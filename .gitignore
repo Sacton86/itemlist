@@ -1,0 +1,9 @@
+# Cached download of the published price sheet.
+# NOT committed: this is the raw workbook and still contains the Cost column,
+# which is deliberately stripped out of index.html. Re-created by running
+# build/refresh-prices.py.
+build/.pricelist-cache.xlsx
+
+__pycache__/
+*.pyc
+.DS_Store

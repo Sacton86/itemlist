@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SOP: ImpactLED Cloud+ Desktop Player — Windows Installation</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:    #0a0a0a;
+      --red:      #cc1111;
+      --white:    #ffffff;
+      --gray-100: #f4f4f4;
+      --gray-200: #e2e2e2;
+      --gray-500: #888888;
+      --gray-700: #444444;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-700);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--black);
+      padding: 24px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    header img { height: 44px; }
+    .header-badge {
+      background: var(--red);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 5px 13px;
+      border-radius: 4px;
+    }
+
+    /* ── TITLE BLOCK ── */
+    .title-block {
+      background: linear-gradient(135deg, #111 0%, #1f1f1f 60%, #2a0404 100%);
+      color: var(--white);
+      padding: 48px 48px 40px;
+      border-bottom: 4px solid var(--red);
+    }
+    .sop-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 10px;
+    }
+    .title-block h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 10px;
+      color: var(--white);
+    }
+    .title-block h1 span { color: var(--red); }
+    .title-block p {
+      font-size: .95rem;
+      color: #bbb;
+      max-width: 640px;
+    }
+    .doc-meta {
+      margin-top: 28px;
+      display: flex;
+      gap: 36px;
+      flex-wrap: wrap;
+      padding-top: 20px;
+      border-top: 1px solid #333;
+    }
+    .doc-meta-item { font-size: 12px; color: #999; }
+    .doc-meta-item strong { display: block; color: var(--white); font-size: 13px; margin-bottom: 2px; }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* ── SECTION ── */
+    .sop-section {
+      background: var(--white);
+      border-radius: 10px;
+      border: 1px solid var(--gray-200);
+      box-shadow: 0 2px 8px rgba(0,0,0,.05);
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+    .sop-section-header {
+      background: var(--black);
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .section-num {
+      background: var(--red);
+      color: var(--white);
+      font-size: 13px;
+      font-weight: 700;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .sop-section-header h2 {
+      color: var(--white);
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: .01em;
+    }
+    .sop-section-body {
+      padding: 28px 32px;
+    }
+
+    /* ── STEPS ── */
+    .step-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .step-list li {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .step-bullet {
+      min-width: 26px;
+      height: 26px;
+      background: var(--red);
+      color: var(--white);
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .step-content { flex: 1; }
+    .step-content strong { color: var(--black); }
+    .step-content p { margin-bottom: 8px; }
+    .step-content p:last-child { margin-bottom: 0; }
+
+    /* ── SUB-LIST ── */
+    .sub-list {
+      list-style: none;
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sub-list li {
+      display: flex;
+      gap: 10px;
+      font-size: .9rem;
+      color: var(--gray-700);
+      align-items: flex-start;
+    }
+    .sub-list li::before {
+      content: '—';
+      color: var(--red);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── CODE BLOCK ── */
+    .cmd {
+      display: block;
+      background: #111;
+      color: #e8e8e8;
+      font-family: 'Courier New', monospace;
+      font-size: .83rem;
+      padding: 12px 16px;
+      border-radius: 6px;
+      border-left: 3px solid var(--red);
+      margin: 10px 0;
+      word-break: break-all;
+      line-height: 1.5;
+    }
+    code {
+      background: #f0f0f0;
+      color: var(--black);
+      font-family: 'Courier New', monospace;
+      font-size: .83rem;
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+
+    /* ── CALLOUT ── */
+    .callout-warn {
+      background: #fff8e1;
+      border-left: 4px solid #f0a500;
+      border-radius: 0 6px 6px 0;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: .88rem;
+      color: #5a4000;
+    }
+    .callout-warn strong { color: #3a2800; }
+
+    .callout-info {
+      background: #e8f0fe;
+      border-left: 4px solid #1a56a0;
+      border-radius: 0 6px 6px 0;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: .88rem;
+      color: #1a3060;
+    }
+    .callout-info strong { color: #0f1f40; }
+
+    .callout-danger {
+      background: #fdecea;
+      border-left: 4px solid var(--red);
+      border-radius: 0 6px 6px 0;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: .88rem;
+      color: #7a1010;
+    }
+    .callout-danger strong { color: #4a0808; }
+
+    .callout-ok {
+      background: #e6f9ec;
+      border-left: 4px solid #28a745;
+      border-radius: 0 6px 6px 0;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: .88rem;
+      color: #1a4a2a;
+    }
+    .callout-ok strong { color: #0f2e19; }
+
+    /* ── TROUBLESHOOT TABLE ── */
+    .trouble-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: .88rem;
+    }
+    .trouble-table thead { background: #f4f4f4; }
+    .trouble-table th {
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--gray-500);
+      border-bottom: 2px solid var(--gray-200);
+    }
+    .trouble-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--gray-200);
+      vertical-align: top;
+    }
+    .trouble-table tr:last-child td { border-bottom: none; }
+    .trouble-table .symptom { font-weight: 600; color: var(--black); }
+    .trouble-table .fix { color: var(--gray-700); }
+
+    /* ── CHECKLIST ── */
+    .checklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: .9rem;
+    }
+    .check-box {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--gray-200);
+      border-radius: 3px;
+      flex-shrink: 0;
+      margin-top: 2px;
+      background: var(--white);
+    }
+
+    /* ── DIVIDER ── */
+    .divider { border: none; border-top: 1px solid var(--gray-200); margin: 8px 0 20px; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--black);
+      color: #555;
+      text-align: center;
+      padding: 24px;
+      font-size: .78rem;
+    }
+    footer span { color: var(--red); }
+
+    @media print {
+      body { background: white; font-size: 13px; }
+      header { padding: 16px 32px; }
+      .title-block { padding: 32px; }
+      main { padding: 24px 0; }
+      .sop-section { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+      footer { display: none; }
+    }
+
+    @media (max-width: 640px) {
+      header { padding: 16px 20px; }
+      .title-block { padding: 32px 20px; }
+      .sop-section-body { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <img src="https://i.imgur.com/8Lz8tfU.png" alt="Impact LED Signs" />
+  <span class="header-badge">Technician SOP</span>
+</header>
+
+<!-- TITLE BLOCK -->
+<div class="title-block">
+  <div class="sop-label">Standard Operating Procedure</div>
+  <h1>ImpactLED Cloud+ <span>Desktop Player</span><br>Windows Installation</h1>
+  <p>
+    Step-by-step installation guide for field technicians deploying the ImpactLED Cloud+ Desktop Player
+    on a Windows 10 or Windows 11 machine.
+  </p>
+  <div class="doc-meta">
+    <div class="doc-meta-item"><strong>Version</strong>v1.0.5</div>
+    <div class="doc-meta-item"><strong>Platform</strong>Windows 10 / 11 (64-bit)</div>
+    <div class="doc-meta-item"><strong>Revised</strong>May 2026</div>
+    <div class="doc-meta-item"><strong>Classification</strong>Internal — Technician Use Only</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main>
+
+  <!-- SECTION 1 -->
+  <div class="sop-section">
+    <div class="sop-section-header">
+      <div class="section-num">1</div>
+      <h2>Pre-Installation Requirements</h2>
+    </div>
+    <div class="sop-section-body">
+      <p style="margin-bottom:16px;">Before beginning the installation, confirm that all of the following are in place. Do not proceed until every item is satisfied.</p>
+
+      <ul class="checklist">
+        <li>
+          <div class="check-box"></div>
+          <span><strong>Windows 10 or Windows 11 (64-bit)</strong> — The player will not run on 32-bit Windows or Windows 7/8.</span>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <span><strong>Active internet connection</strong> — The installer downloads the player executable directly from GitHub. No internet means no install.</span>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <span><strong>Administrator access to the machine</strong> — The installer requires elevated privileges. Confirm with the site contact that you have local admin credentials before arriving.</span>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <span><strong>Terminal ID</strong> — The device's unique identifier in Impact Cloud+. Obtain this from the Cloud+ portal before the visit (<code>access.impactledsigns.com</code>).</span>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <span><strong>Terminal Secret</strong> — The authentication key paired to the Terminal ID. Obtain alongside the Terminal ID from the Cloud+ portal.</span>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <span><strong>Display resolution</strong> — Know the target resolution (typically <strong>1920 x 1080</strong>) before starting. The installer will prompt for this.</span>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <span><strong>Display connected and powered on</strong> — The player launches immediately after install. The display should be connected via HDMI or DisplayPort before running the installer.</span>
+        </li>
+      </ul>
+
+      <div class="callout-warn" style="margin-top:20px;">
+        <strong>CMD vs. PowerShell</strong>
+        Two versions of the install command exist — one for Command Prompt (CMD) and one for PowerShell.
+        Use the correct command for whichever terminal you open. The CMD command uses <code>%TEMP%</code>
+        syntax that does <strong>not</strong> work in PowerShell and will produce a
+        "system cannot find the path specified" error if mismatched.
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="sop-section">
+    <div class="sop-section-header">
+      <div class="section-num">2</div>
+      <h2>Opening an Administrator Command Prompt</h2>
+    </div>
+    <div class="sop-section-body">
+      <p style="margin-bottom:18px;">The installer will immediately exit with an error if it is not running as Administrator. Follow these steps exactly.</p>
+
+      <ul class="step-list">
+        <li>
+          <div class="step-bullet">1</div>
+          <div class="step-content">
+            <p>Click the <strong>Start</strong> button or press the <strong>Windows key</strong>.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-bullet">2</div>
+          <div class="step-content">
+            <p>Type <code>cmd</code> into the search bar. Do <strong>not</strong> press Enter yet.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-bullet">3</div>
+          <div class="step-content">
+            <p><strong>Right-click</strong> on "Command Prompt" in the search results.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-bullet">4</div>
+          <div class="step-content">
+            <p>Select <strong>"Run as administrator"</strong> from the context menu.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-bullet">5</div>
+          <div class="step-content">
+            <p>If a User Account Control (UAC) prompt appears asking <em>"Do you want to allow this app to make changes to your device?"</em>, click <strong>Yes</strong>.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-bullet">6</div>
+          <div class="step-content">
+            <p>Confirm that the title bar of the Command Prompt window reads <strong>"Administrator: Command Prompt"</strong>. If it does not say Administrator, close it and repeat from step 1.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="sop-section">
+    <div class="sop-section-header">
+      <div class="section-num">3</div>
+      <h2>Running the Installer</h2>
+    </div>
+    <div class="sop-section-body">
+      <ul class="step-list">
+        <li>
+          <div class="step-bullet">1</div>
+          <div class="step-content">
+            <p>Copy and paste the command that matches your terminal type exactly as written. Do not retype it manually — a single missing character will cause it to fail.</p>
+            <p><strong>Command Prompt (CMD) — recommended:</strong></p>
+            <span class="cmd">curl -fsSL https://raw.githubusercontent.com/Sacton86/Cloud-Desktop-Edition/main/full-install.bat -o %TEMP%\full-install.bat && %TEMP%\full-install.bat</span>
+            <p><strong>PowerShell (alternative):</strong></p>
+            <span class="cmd">curl -fsSL https://raw.githubusercontent.com/Sacton86/Cloud-Desktop-Edition/main/full-install.bat -o "$env:TEMP\full-install.bat"; &amp; "$env:TEMP\full-install.bat"</span>
+          </div>
+        </li>
+        <li>
+          <div class="step-bullet">2</div>
+          <div class="step-content">
+            <p>Press <strong>Enter</strong>. The installer will display a banner and begin downloading.</p>
+            <p>You will see the following output confirming a successful start:</p>
+            <span class="cmd">##############################################################
+  ImpactLED Cloud+ Desktop Player
+  Full Device Installer  --  Impact LED Signs
+##############################################################</span>
+          </div>
+        </li>
+        <li>
+          <div class="step-bullet">3</div>
+          <div class="step-content">
+            <p>Wait for the download to complete. You will see <code>[OK]  Download complete.</code> when it finishes. This typically takes 10–30 seconds depending on connection speed.</p>
+          </div>
+        </li>
+      </ul>
+
+      <div class="callout-danger" style="margin-top:4px;">
+        <strong>Download Failure</strong>
+        If you see <code>[ERROR]  Download failed</code>, the machine cannot reach GitHub. Verify the internet
+        connection is active, confirm there is no firewall blocking <strong>github.com</strong>, and try again.
+        Do not proceed until the download succeeds.
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="sop-section">
+    <div class="sop-section-header">
+      <div class="section-num">4</div>
+      <h2>Entering Device Credentials and Display Settings</h2>
+    </div>
+    <div class="sop-section-body">
+      <p style="margin-bottom:18px;">After the download completes, the installer will prompt for four pieces of information. Enter each carefully — these credentials are written to the device config file and must be correct for the player to connect to Impact Cloud+.</p>
+
+      <ul class="step-list">
+        <li>
+          <div class="step-bullet">1</div>
+          <div class="step-content">
+            <p><strong>Terminal ID</strong> — When prompted with <code>? Terminal ID :</code>, enter the Terminal ID exactly as it appears in the Impact Cloud+ portal. Press <strong>Enter</strong>.</p>
+            <div class="callout-warn">
+              The Terminal ID is case-sensitive. Copy it directly from the Cloud+ portal where possible to avoid transcription errors.
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="step-bullet">2</div>
+          <div class="step-content">
+            <p><strong>Terminal Secret</strong> — When prompted with <code>? Terminal Secret :</code>, enter the Terminal Secret. Press <strong>Enter</strong>.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-bullet">3</div>
+          <div class="step-content">
+            <p><strong>Cloud+ Server URL</strong> — When prompted with <code>? Cloud+ server URL [https://access.impactledsigns.com/] :</code>, press <strong>Enter</strong> to accept the default unless you have been given a different server address.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-bullet">4</div>
+          <div class="step-content">
+            <p><strong>Display Width</strong> — When prompted with <code>? Display width [1920] :</code>, enter the correct width in pixels or press <strong>Enter</strong> to accept the 1920 default.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-bullet">5</div>
+          <div class="step-content">
+            <p><strong>Display Height</strong> — When prompted with <code>? Display height [1080] :</code>, enter the correct height in pixels or press <strong>Enter</strong> to accept the 1080 default.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-bullet">6</div>
+          <div class="step-content">
+            <p><strong>Fullscreen Mode</strong> — When prompted with <code>? Fullscreen mode (true/false) [true] :</code>, press <strong>Enter</strong> to accept the default <code>true</code> for a sign installation. Only enter <code>false</code> if this is a testing or preview setup.</p>
+          </div>
+        </li>
+      </ul>
+
+      <div class="callout-info" style="margin-top:8px;">
+        <strong>After Entering Credentials</strong>
+        The installer will display "Beginning installation…" and proceed automatically through four steps:
+        downloading the release, installing files, writing the config, and registering startup tasks.
+        No further input is required.
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="sop-section">
+    <div class="sop-section-header">
+      <div class="section-num">5</div>
+      <h2>Verifying a Successful Installation</h2>
+    </div>
+    <div class="sop-section-body">
+      <p style="margin-bottom:18px;">Once the installer completes, verify each of the following before closing the Command Prompt window.</p>
+
+      <ul class="step-list">
+        <li>
+          <div class="step-bullet">1</div>
+          <div class="step-content">
+            <p><strong>Confirm the installer finished successfully.</strong> The final output should display:</p>
+            <span class="cmd">[OK]  Installation complete!</span>
+            <p>If you see any <code>[ERROR]</code> lines, do not proceed. See Section 6 — Troubleshooting.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-bullet">2</div>
+          <div class="step-content">
+            <p><strong>Check the installed version.</strong> In the same Command Prompt window, run:</p>
+            <span class="cmd">type C:\ImpactLED\CloudPlayer\version.txt</span>
+            <p>This should print the current version number (e.g. <code>v1.0.5</code>). If the file does not exist, the installer did not complete successfully.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-bullet">3</div>
+          <div class="step-content">
+            <p><strong>Verify the startup tasks are registered.</strong> Press <strong>Win + R</strong>, type <code>taskschd.msc</code>, and press Enter. In the Task Scheduler Library, confirm both of the following tasks are present:</p>
+            <ul class="sub-list">
+              <li><strong>ImpactLED Cloud+ Desktop Player</strong> — triggers at logon, runs the player</li>
+              <li><strong>ImpactLED Cloud+ Updater</strong> — triggers at startup, checks for updates 5 minutes after boot</li>
+            </ul>
+            <p style="margin-top:10px;">If either task is missing, run the manual registration commands in Section 6.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-bullet">4</div>
+          <div class="step-content">
+            <p><strong>Confirm the player launched.</strong> A new window titled <strong>"ImpactLED Cloud+ Desktop Player"</strong> should have opened automatically. The screen will display the Impact Cloud+ logo while connecting. Within 30–60 seconds it should begin playing the assigned playlist.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-bullet">5</div>
+          <div class="step-content">
+            <p><strong>Confirm Cloud+ connectivity.</strong> Press <strong>I</strong> on the keyboard while the player is focused to toggle the on-screen HUD. The HUD will show the connection status. Confirm it reads <strong>online</strong>. If it shows an error, verify the Terminal ID and Terminal Secret in the settings panel (<strong>F12</strong>).</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-bullet">6</div>
+          <div class="step-content">
+            <p><strong>Test autostart.</strong> Reboot the machine. The player should launch automatically after login without any manual steps. If it does not start, verify the Task Scheduler tasks from step 3.</p>
+          </div>
+        </li>
+      </ul>
+
+      <div class="callout-ok">
+        <strong>Installation Complete</strong>
+        If all six checks pass, the installation is confirmed. The device will auto-update whenever a
+        new version is released — no further maintenance is required unless credentials change.
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="sop-section">
+    <div class="sop-section-header">
+      <div class="section-num">6</div>
+      <h2>Troubleshooting Common Issues</h2>
+    </div>
+    <div class="sop-section-body">
+
+      <table class="trouble-table">
+        <thead>
+          <tr>
+            <th style="width:35%">Symptom / Error</th>
+            <th>Cause &amp; Resolution</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="symptom">The system cannot find the path specified</td>
+            <td class="fix">
+              The <code>%TEMP%</code> variable did not expand correctly. This happens when the command is run in
+              <strong>PowerShell instead of Command Prompt</strong>. Close PowerShell and reopen
+              an Admin <strong>Command Prompt</strong> (CMD), then run the command again.
+              Also check that both <code>%TEMP%</code> references in the command have a <code>%</code>
+              on each side.
+            </td>
+          </tr>
+          <tr>
+            <td class="symptom">[ERROR] Must be run as Administrator</td>
+            <td class="fix">
+              The Command Prompt was not opened with admin rights. Close it and follow Section 2 again,
+              ensuring the title bar reads <strong>"Administrator: Command Prompt"</strong> before running
+              the install command.
+            </td>
+          </tr>
+          <tr>
+            <td class="symptom">[ERROR] Download failed</td>
+            <td class="fix">
+              The machine cannot reach GitHub. Verify the internet connection is active.
+              If on a managed network, ask the IT contact to confirm that <strong>github.com</strong> and
+              <strong>raw.githubusercontent.com</strong> are not blocked by a firewall or content filter.
+            </td>
+          </tr>
+          <tr>
+            <td class="symptom">[ERROR] ImpactLED-Cloud-Player.exe not found after extraction</td>
+            <td class="fix">
+              The GitHub release package is missing the compiled executable. This means a new version tag
+              was pushed but the GitHub Actions build has not finished yet, or it failed.
+              Wait 5 minutes and run the installer again. If the error persists, check the
+              Actions tab at github.com/Sacton86/Cloud-Desktop-Edition for build errors.
+            </td>
+          </tr>
+          <tr>
+            <td class="symptom">Player window opens but shows no content</td>
+            <td class="fix">
+              The player connected to Cloud+ but no playlist is assigned to this terminal.
+              Log into Impact Cloud+ at <strong>access.impactledsigns.com</strong>, locate the terminal
+              by its Terminal ID, and assign a playlist. The player polls every 30 seconds
+              and will pick up the content automatically.
+            </td>
+          </tr>
+          <tr>
+            <td class="symptom">HUD shows "offline" or connection error after launch</td>
+            <td class="fix">
+              The Terminal ID or Terminal Secret entered during install is incorrect.
+              Press <strong>F12</strong> to open the settings panel, navigate to the
+              <strong>Impact Cloud+ Sync</strong> section, and correct the credentials.
+              Changes take effect on the next poll cycle (within 30 seconds).
+            </td>
+          </tr>
+          <tr>
+            <td class="symptom">Startup tasks missing from Task Scheduler</td>
+            <td class="fix">
+              The schtasks registration step failed silently during install, usually due to a group policy restriction.
+              Run the following two commands in an Admin Command Prompt to register them manually:
+              <span class="cmd">schtasks /create /tn "ImpactLED Cloud+ Desktop Player" /tr "cmd /c \"C:\ImpactLED\CloudPlayer\run_player.bat\"" /sc ONLOGON /ru "%USERNAME%" /f</span>
+              <span class="cmd">schtasks /create /tn "ImpactLED Cloud+ Updater" /tr "cmd /c \"C:\ImpactLED\CloudPlayer\updater.bat\"" /sc ONSTART /delay 0005:00 /ru SYSTEM /f</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="symptom">Updated playlist not appearing on the player</td>
+            <td class="fix">
+              The player checks for content changes every 30 seconds. Wait up to one minute after
+              updating a playlist in Cloud+. If the content still does not update, the player may need
+              to be restarted — the updater will re-detect the change on the next sync cycle after restart.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="sop-section">
+    <div class="sop-section-header">
+      <div class="section-num">7</div>
+      <h2>Useful On-Site Commands</h2>
+    </div>
+    <div class="sop-section-body">
+      <p style="margin-bottom:20px;">The following commands may be needed during a site visit. All require an <strong>Administrator Command Prompt</strong> unless noted.</p>
+
+      <ul class="step-list">
+        <li>
+          <div class="step-bullet" style="background:#444;">↓</div>
+          <div class="step-content">
+            <p><strong>Check the installed version</strong> (no admin required):</p>
+            <span class="cmd">type C:\ImpactLED\CloudPlayer\version.txt</span>
+          </div>
+        </li>
+        <li>
+          <div class="step-bullet" style="background:#444;">↓</div>
+          <div class="step-content">
+            <p><strong>Force an immediate update check</strong> (checks GitHub and updates if a new version is available):</p>
+            <span class="cmd">C:\ImpactLED\CloudPlayer\updater.bat</span>
+          </div>
+        </li>
+        <li>
+          <div class="step-bullet" style="background:#444;">↓</div>
+          <div class="step-content">
+            <p><strong>Start the player manually</strong> without rebooting:</p>
+            <span class="cmd">C:\ImpactLED\CloudPlayer\run_player.bat</span>
+          </div>
+        </li>
+        <li>
+          <div class="step-bullet" style="background:#444;">↓</div>
+          <div class="step-content">
+            <p><strong>Open the settings panel</strong> — while the player window is focused, press:</p>
+            <span class="cmd">F12</span>
+          </div>
+        </li>
+      </ul>
+
+      <hr class="divider" style="margin-top:24px;" />
+      <p style="margin-bottom:12px;"><strong>Player Keyboard Shortcuts</strong> — all keys require the player window to be focused:</p>
+      <table class="trouble-table">
+        <thead>
+          <tr>
+            <th style="width:20%">Key</th>
+            <th>Function</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="symptom"><code>I</code></td><td class="fix">Toggle on-screen info / HUD — shows connection status and current playlist</td></tr>
+          <tr><td class="symptom"><code>F12</code></td><td class="fix">Open settings panel — edit Terminal ID, Terminal Secret, and display settings</td></tr>
+          <tr><td class="symptom"><code>F11</code></td><td class="fix">Toggle fullscreen mode on/off</td></tr>
+          <tr><td class="symptom"><code>Space</code></td><td class="fix">Play / pause the current playlist</td></tr>
+          <tr><td class="symptom"><code>P</code></td><td class="fix">Upload a screenshot of the current frame to Cloud+</td></tr>
+          <tr><td class="symptom"><code>O</code></td><td class="fix">Load a local file for playback (testing use)</td></tr>
+          <tr><td class="symptom"><code>ESC</code></td><td class="fix">Exit the player application</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="sop-section">
+    <div class="sop-section-header">
+      <div class="section-num">8</div>
+      <h2>Uninstalling the Player</h2>
+    </div>
+    <div class="sop-section-body">
+      <p style="margin-bottom:16px;">To completely remove the player, startup tasks, and all installed files from a machine, run the following command in an <strong>Administrator Command Prompt</strong>. This is a single line — copy it in full.</p>
+
+      <span class="cmd">schtasks /end /tn "ImpactLED Cloud+ Desktop Player" >nul 2>&1 && schtasks /end /tn "ImpactLED Cloud+ Updater" >nul 2>&1 && schtasks /delete /tn "ImpactLED Cloud+ Desktop Player" /f && schtasks /delete /tn "ImpactLED Cloud+ Updater" /f && taskkill /f /im "ImpactLED-Cloud-Player.exe" >nul 2>&1 && rmdir /s /q "C:\ImpactLED"</span>
+
+      <p style="margin-top:14px;">This will:</p>
+      <ul class="sub-list" style="margin-top:8px;">
+        <li>Stop the player and updater if they are currently running</li>
+        <li>Remove both startup tasks from Task Scheduler</li>
+        <li>Force-close the player executable if open</li>
+        <li>Delete the entire <code>C:\ImpactLED\</code> folder and all contents</li>
+      </ul>
+
+      <div class="callout-warn" style="margin-top:16px;">
+        <strong>This action is irreversible.</strong> Device credentials stored in
+        <code>player_config.json</code> will be permanently deleted. Record the Terminal ID and
+        Terminal Secret before uninstalling if they will be needed for reinstallation.
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <p>Impact LED Signs &nbsp;·&nbsp; <span>Internal Use Only — Technician SOP</span> &nbsp;·&nbsp; ImpactLED Cloud+ Desktop Player v1.0.5 &nbsp;·&nbsp; May 2026</p>
+</footer>
+
+</body>
+</html>

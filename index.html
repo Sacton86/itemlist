@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Impact LED — Item Catalog &amp; Quote Builder</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --black:    #0a0a0a;
+  --red:      #cc1111;
+  --red-dark: #a50d0d;
+  --white:    #ffffff;
+  --gray-100: #f4f4f4;
+  --gray-200: #e2e2e2;
+  --gray-300: #cfcfcf;
+  --gray-500: #888888;
+  --gray-700: #444444;
+  --tray-h:   72px;
+}
+
+html { scroll-padding-top: 148px; }
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: var(--gray-100);
+  color: var(--gray-700);
+  line-height: 1.7;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--black);
+  padding: 20px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+header img { height: 40px; }
+.header-badge {
+  background: var(--red);
+  color: var(--white);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 5px 13px;
+  border-radius: 4px;
+}
+
+/* ── TITLE BLOCK ── */
+.title-block {
+  background: linear-gradient(135deg, #111 0%, #1f1f1f 60%, #2a0404 100%);
+  color: var(--white);
+  padding: 40px 48px 32px;
+  border-bottom: 4px solid var(--red);
+}
+.kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 10px;
+}
+.title-block h1 {
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 10px;
+  color: var(--white);
+}
+.title-block h1 span { color: var(--red); }
+.title-block p { font-size: .95rem; color: #bbb; max-width: 660px; }
+.doc-meta {
+  margin-top: 24px;
+  display: flex;
+  gap: 36px;
+  flex-wrap: wrap;
+  padding-top: 18px;
+  border-top: 1px solid #333;
+}
+.doc-meta-item { font-size: 12px; color: #999; }
+.doc-meta-item strong { display: block; color: var(--white); font-size: 13px; margin-bottom: 2px; }
+
+/* ── CONTROL BAR ── */
+.controls {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+  padding: 14px 48px;
+}
+.controls-inner { max-width: 1360px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+.search-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.search-wrap { position: relative; flex: 1; min-width: 240px; }
+.search-wrap svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+#search {
+  width: 100%;
+  font-family: inherit;
+  font-size: .95rem;
+  color: var(--black);
+  padding: 11px 40px 11px 42px;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  background: var(--gray-100);
+  transition: border-color .15s, background .15s;
+}
+#search:focus { outline: none; border-color: var(--red); background: var(--white); }
+.search-clear {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  border: none; background: none; cursor: pointer; color: var(--gray-500);
+  font-size: 20px; line-height: 1; padding: 4px 8px; display: none;
+}
+.search-clear:hover { color: var(--red); }
+
+.price-toggle { display: flex; border: 1px solid var(--gray-200); border-radius: 8px; overflow: hidden; }
+.price-toggle button {
+  font-family: inherit; font-size: 12px; font-weight: 600; letter-spacing: .03em;
+  padding: 10px 15px; border: none; background: var(--white); color: var(--gray-500);
+  cursor: pointer; white-space: nowrap; transition: background .15s, color .15s;
+}
+.price-toggle button + button { border-left: 1px solid var(--gray-200); }
+.price-toggle button:hover { background: var(--gray-100); color: var(--black); }
+.price-toggle button.on { background: var(--black); color: var(--white); }
+
+.chip-row { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; }
+.chip-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--gray-500); margin-right: 4px;
+}
+.chip {
+  font-family: inherit; font-size: 12px; font-weight: 600;
+  padding: 6px 13px; border-radius: 20px;
+  border: 1px solid var(--gray-200); background: var(--white); color: var(--gray-700);
+  cursor: pointer; white-space: nowrap;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.chip:hover { border-color: var(--gray-300); background: var(--gray-100); }
+.chip.on { background: var(--black); border-color: var(--black); color: var(--white); }
+.chip.alert.on { background: var(--red); border-color: var(--red); }
+.chip .count { opacity: .55; font-weight: 500; margin-left: 4px; }
+
+/* ── MAIN ── */
+main {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 32px 48px calc(var(--tray-h) + 60px);
+}
+
+.result-line { font-size: 13px; color: var(--gray-500); margin-bottom: 20px; }
+.result-line strong { color: var(--black); }
+
+/* ── GENERATION SECTION ── */
+.gen-section { margin-bottom: 30px; }
+.gen-header {
+  background: var(--black);
+  padding: 13px 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-radius: 10px 10px 0 0;
+}
+.gen-badge {
+  background: var(--red); color: var(--white);
+  font-size: 12px; font-weight: 700; letter-spacing: .04em;
+  min-width: 32px; height: 32px; padding: 0 10px;
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.gen-header h2 { color: var(--white); font-size: 1rem; font-weight: 600; }
+.gen-header .gen-count { margin-left: auto; font-size: 12px; color: #999; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+  gap: 18px;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  padding: 22px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+
+/* ── ITEM CARD ── */
+.card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--gray-200);
+  border-radius: 9px;
+  overflow: hidden;
+  background: var(--white);
+  transition: border-color .15s, box-shadow .15s, transform .15s;
+}
+.card:hover { border-color: var(--gray-300); box-shadow: 0 4px 14px rgba(0,0,0,.09); transform: translateY(-2px); }
+.card.selected { border-color: var(--red); box-shadow: 0 0 0 1px var(--red), 0 4px 14px rgba(204,17,17,.14); }
+.card.tbd { opacity: .82; }
+
+.card-img {
+  position: relative;
+  height: 150px;
+  background: var(--gray-100);
+  display: flex; align-items: center; justify-content: center;
+  border-bottom: 1px solid var(--gray-200);
+  overflow: hidden;
+}
+.card-img img { max-width: 100%; max-height: 100%; object-fit: contain; padding: 10px; cursor: zoom-in; }
+.card-img .zoom-hint {
+  position: absolute; bottom: 7px; right: 7px;
+  background: rgba(10,10,10,.72); color: var(--white);
+  font-size: 9px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase;
+  padding: 3px 7px; border-radius: 3px;
+  opacity: 0; transition: opacity .15s; pointer-events: none;
+}
+.card:hover .card-img .zoom-hint { opacity: 1; }
+
+/* ── LIGHTBOX ── */
+.lightbox {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(8,8,8,.93);
+  display: none;
+  flex-direction: column; align-items: center; justify-content: center;
+  padding: 56px 32px 32px;
+}
+.lightbox.show { display: flex; }
+.lightbox img {
+  max-width: 100%; max-height: calc(100vh - 150px);
+  object-fit: contain;
+  background: var(--white); border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
+.lightbox-bar {
+  position: absolute; top: 0; left: 0; right: 0;
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 22px;
+  background: var(--black); border-bottom: 2px solid var(--red);
+}
+.lightbox-bar .lb-part { color: var(--white); font-size: .9rem; font-weight: 700; }
+.lightbox-bar .lb-desc { color: #999; font-size: .8rem; flex: 1; }
+.lightbox-bar a, .lightbox-bar button {
+  font-family: inherit; font-size: 11px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; text-decoration: none;
+  background: none; border: 1px solid #444; color: #bbb;
+  padding: 7px 13px; border-radius: 5px; cursor: pointer; white-space: nowrap;
+  transition: border-color .15s, color .15s;
+}
+.lightbox-bar a:hover, .lightbox-bar button:hover { border-color: var(--red); color: var(--white); }
+.lightbox-bar .lb-close { font-size: 20px; line-height: 1; padding: 3px 11px; border-color: transparent; }
+.lightbox-tip {
+  margin-top: 16px; color: #888; font-size: 12px; text-align: center;
+}
+.lightbox-tip strong { color: #ccc; font-weight: 600; }
+.placeholder {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 7px; padding: 12px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #262626 60%, #2a0808 100%);
+}
+.placeholder .mono {
+  font-size: 1.05rem; font-weight: 700; letter-spacing: .02em; line-height: 1.25;
+  color: rgba(255,255,255,.9); text-align: center; word-break: break-word;
+}
+.placeholder .note {
+  font-size: 9px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--red);
+}
+.tbd-flag {
+  position: absolute; top: 8px; left: 8px;
+  background: #f0a500; color: #3a2800;
+  font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 3px;
+}
+.sel-flag {
+  position: absolute; top: 8px; right: 8px;
+  background: var(--red); color: var(--white);
+  width: 22px; height: 22px; border-radius: 50%;
+  display: none; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+}
+.card.selected .sel-flag { display: flex; }
+
+.card-body { padding: 13px 15px; flex: 1; display: flex; flex-direction: column; }
+.card-part {
+  font-size: .82rem; font-weight: 700; color: var(--black);
+  line-height: 1.35; word-break: break-word;
+}
+.card-desc {
+  font-size: .78rem; color: var(--gray-500); line-height: 1.45;
+  margin-top: 3px; flex: 1;
+}
+.card-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 9px; }
+.tag {
+  font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 3px;
+  background: var(--gray-100); color: var(--gray-500); border: 1px solid var(--gray-200);
+}
+
+.card-prices { margin-top: 11px; border-top: 1px solid var(--gray-200); padding-top: 9px; }
+.price-row { display: flex; justify-content: space-between; align-items: baseline; font-size: .78rem; }
+.price-row + .price-row { margin-top: 2px; }
+.price-row .label { color: var(--gray-500); font-weight: 500; }
+.price-row .value { font-weight: 700; color: var(--black); font-size: .92rem; }
+.price-row.enduser .value { color: var(--red); }
+.price-row.hide { display: none; }
+.price-row .value.none { color: var(--gray-300); font-weight: 600; font-size: .8rem; }
+
+.card-actions { display: flex; gap: 8px; padding: 0 15px 14px; }
+.qty {
+  display: flex; align-items: center;
+  border: 1px solid var(--gray-200); border-radius: 6px; overflow: hidden; flex-shrink: 0;
+}
+.qty button {
+  font-family: inherit; width: 26px; height: 32px; border: none; background: var(--white);
+  color: var(--gray-700); font-size: 15px; cursor: pointer; line-height: 1;
+}
+.qty button:hover { background: var(--gray-100); color: var(--black); }
+.qty input {
+  font-family: inherit; width: 34px; height: 32px; border: none; text-align: center;
+  font-size: .82rem; font-weight: 600; color: var(--black); background: var(--white);
+  -moz-appearance: textfield;
+}
+.qty input::-webkit-outer-spin-button, .qty input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.qty input:focus { outline: none; background: var(--gray-100); }
+
+.btn-add {
+  flex: 1; font-family: inherit; font-size: .78rem; font-weight: 700;
+  letter-spacing: .04em; text-transform: uppercase;
+  border: none; border-radius: 6px; cursor: pointer;
+  background: var(--black); color: var(--white);
+  transition: background .15s;
+}
+.btn-add:hover { background: var(--red); }
+.btn-add.added { background: var(--red); }
+.btn-add:disabled { background: var(--gray-200); color: var(--gray-500); cursor: not-allowed; }
+
+/* ── EMPTY STATE ── */
+.empty {
+  background: var(--white); border: 1px solid var(--gray-200); border-radius: 10px;
+  padding: 70px 30px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+.empty h3 { color: var(--black); font-size: 1.05rem; font-weight: 600; margin-bottom: 6px; }
+.empty p { font-size: .9rem; color: var(--gray-500); }
+
+/* ── QUOTE TRAY ── */
+.tray {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+  background: var(--black); color: var(--white);
+  border-top: 3px solid var(--red);
+  padding: 0 48px;
+  height: var(--tray-h);
+  display: none;
+  align-items: center;
+  gap: 26px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,.25);
+}
+.tray.show { display: flex; }
+.tray-inner { max-width: 1360px; margin: 0 auto; width: 100%; display: flex; align-items: center; gap: 26px; }
+.tray-stat { font-size: 11px; color: #999; letter-spacing: .04em; }
+.tray-stat strong { display: block; color: var(--white); font-size: 1.05rem; font-weight: 700; letter-spacing: 0; }
+.tray-stat.total strong { color: var(--red); }
+.tray-spacer { flex: 1; }
+.btn-ghost {
+  font-family: inherit; font-size: 12px; font-weight: 600;
+  background: none; border: 1px solid #444; color: #aaa;
+  padding: 9px 16px; border-radius: 6px; cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.btn-ghost:hover { border-color: var(--red); color: var(--white); }
+.btn-primary {
+  font-family: inherit; font-size: .82rem; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase;
+  background: var(--red); border: none; color: var(--white);
+  padding: 13px 26px; border-radius: 6px; cursor: pointer;
+  transition: background .15s;
+}
+.btn-primary:hover { background: var(--red-dark); }
+.btn-primary:disabled { background: var(--gray-500); cursor: not-allowed; }
+
+/* ── MODAL ── */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,.6);
+  display: none;
+  align-items: flex-start; justify-content: center;
+  padding: 32px 24px;
+  overflow-y: auto;
+}
+.modal-backdrop.show { display: flex; }
+.modal {
+  background: var(--gray-100);
+  width: 100%; max-width: 1180px;
+  border-radius: 12px; overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,.4);
+}
+.modal-header {
+  background: var(--black); padding: 18px 30px;
+  display: flex; align-items: center; gap: 16px;
+}
+.modal-header h2 { color: var(--white); font-size: 1.05rem; font-weight: 600; flex: 1; }
+.modal-close {
+  background: none; border: none; color: #888; font-size: 26px; line-height: 1;
+  cursor: pointer; padding: 0 6px;
+}
+.modal-close:hover { color: var(--red); }
+
+.modal-body { display: grid; grid-template-columns: 350px 1fr; gap: 0; }
+.pane-left { background: var(--white); padding: 26px 28px; border-right: 1px solid var(--gray-200); }
+.pane-right { padding: 26px 28px; }
+
+.field-group { margin-bottom: 22px; }
+.field-group > h3 {
+  font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--gray-500); margin-bottom: 11px;
+  padding-bottom: 7px; border-bottom: 1px solid var(--gray-200);
+}
+.field { margin-bottom: 11px; }
+.field label {
+  display: block; font-size: 11px; font-weight: 600; color: var(--gray-700);
+  margin-bottom: 4px; letter-spacing: .02em;
+}
+.field input, .field textarea {
+  width: 100%; font-family: inherit; font-size: .85rem; color: var(--black);
+  padding: 8px 11px; border: 1px solid var(--gray-200); border-radius: 6px;
+  background: var(--white);
+}
+.field input:focus, .field textarea:focus { outline: none; border-color: var(--red); }
+.field textarea { resize: vertical; min-height: 78px; line-height: 1.6; }
+.field-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.basis {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 9px;
+}
+.basis label {
+  display: block; cursor: pointer;
+  border: 2px solid var(--gray-200); border-radius: 8px;
+  padding: 11px 13px; text-align: center;
+  transition: border-color .15s, background .15s;
+}
+.basis label:hover { border-color: var(--gray-300); }
+.basis input { position: absolute; opacity: 0; pointer-events: none; }
+.basis .name { display: block; font-size: .84rem; font-weight: 700; color: var(--black); }
+.basis .hint { display: block; font-size: 10px; color: var(--gray-500); letter-spacing: .04em; margin-top: 1px; }
+.basis input:checked + .name { color: var(--red); }
+.basis label:has(input:checked) { border-color: var(--red); background: #fdf3f3; }
+
+/* ── LINE ITEMS ── */
+.lines-head {
+  display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px;
+}
+.lines-head h3 { font-size: 1rem; font-weight: 600; color: var(--black); }
+.lines-head span { font-size: 12px; color: var(--gray-500); }
+
+.lines { width: 100%; border-collapse: collapse; font-size: .84rem; background: var(--white); border-radius: 8px; overflow: hidden; }
+.lines thead { background: var(--gray-100); }
+.lines th {
+  padding: 9px 11px; text-align: left;
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em;
+  color: var(--gray-500); border-bottom: 2px solid var(--gray-200); white-space: nowrap;
+}
+.lines td { padding: 9px 11px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; }
+.lines tr:last-child td { border-bottom: none; }
+.lines .num { text-align: right; white-space: nowrap; }
+.lines .part { font-weight: 700; color: var(--black); font-size: .8rem; }
+.lines .desc { font-size: .74rem; color: var(--gray-500); }
+.lines input {
+  font-family: inherit; font-size: .82rem; font-weight: 600; color: var(--black);
+  width: 56px; padding: 5px 7px; text-align: center;
+  border: 1px solid var(--gray-200); border-radius: 5px; background: var(--white);
+  -moz-appearance: textfield;
+}
+.lines input::-webkit-outer-spin-button, .lines input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.lines input:focus { outline: none; border-color: var(--red); }
+.lines .ext { font-weight: 700; color: var(--black); }
+.line-remove {
+  background: none; border: none; color: var(--gray-300); cursor: pointer;
+  font-size: 17px; line-height: 1; padding: 2px 5px;
+}
+.line-remove:hover { color: var(--red); }
+
+/* ── TOTALS ── */
+.totals {
+  margin-top: 18px; margin-left: auto; width: 330px;
+  background: var(--white); border: 1px solid var(--gray-200); border-radius: 8px;
+  overflow: hidden;
+}
+.totals .row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 16px; font-size: .85rem;
+}
+.totals .row + .row { border-top: 1px solid var(--gray-200); }
+.totals .row .k { color: var(--gray-500); }
+.totals .row .v { font-weight: 600; color: var(--black); }
+.totals .row.discount .v { color: var(--red); }
+.totals .row.grand {
+  background: var(--black); padding: 13px 16px;
+  border-top: 3px solid var(--red);
+}
+.totals .row.grand .k { color: #999; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.totals .row.grand .v { color: var(--white); font-size: 1.35rem; font-weight: 700; }
+
+.modal-footer {
+  background: var(--white); border-top: 1px solid var(--gray-200);
+  padding: 16px 30px; display: flex; align-items: center; gap: 12px;
+}
+.modal-footer .msg { flex: 1; font-size: 12px; color: var(--red); font-weight: 600; }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--black); color: #555; text-align: center;
+  padding: 22px; font-size: .78rem;
+}
+footer span { color: var(--red); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  header, .controls, main { padding-left: 20px; padding-right: 20px; }
+  .title-block { padding: 32px 20px 26px; }
+  .tray { padding: 0 20px; height: auto; }
+  .tray-inner { flex-wrap: wrap; gap: 14px; padding: 12px 0; }
+  .modal-body { grid-template-columns: 1fr; }
+  .pane-left { border-right: none; border-bottom: 1px solid var(--gray-200); }
+  .totals { width: 100%; }
+}
+@media (max-width: 560px) {
+  .grid { grid-template-columns: 1fr 1fr; gap: 12px; padding: 14px; }
+  .card-img { height: 120px; }
+  .lines .desc, .lines .hide-sm { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <img src="Impact Logo.png" alt="Impact LED Signs" />
+  <span class="header-badge">Item Catalog</span>
+</header>
+
+<div class="title-block">
+  <div class="kicker">Parts &amp; Pricing</div>
+  <h1>Item Catalog &amp; <span>Quote Builder</span></h1>
+  <p>
+    Search every part across all sign generations, select what the job needs, and generate a
+    customer-ready quote at dealer or end-user pricing.
+  </p>
+  <div class="doc-meta">
+    <div class="doc-meta-item"><strong id="meta-skus">—</strong>Items</div>
+    <div class="doc-meta-item"><strong id="meta-gens">—</strong>Generations</div>
+    <div class="doc-meta-item"><strong>September 10, 2026</strong>Price List Revised</div>
+    <div class="doc-meta-item"><strong>Internal</strong>Technician Use</div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="controls-inner">
+    <div class="search-row">
+      <div class="search-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2.2"
+             stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        <input type="search" id="search" placeholder="Search part number or description…"
+               autocomplete="off" spellcheck="false" />
+        <button class="search-clear" id="search-clear" aria-label="Clear search">&times;</button>
+      </div>
+      <div class="price-toggle" id="price-toggle">
+        <button data-view="both" class="on">Both Prices</button>
+        <button data-view="dealer">Dealer</button>
+        <button data-view="enduser">End User</button>
+      </div>
+    </div>
+
+    <div class="chip-row" id="gen-chips"><span class="chip-label">Generation</span></div>
+    <div class="chip-row" id="cat-chips"><span class="chip-label">Category</span></div>
+  </div>
+</div>
+
+<main>
+  <div class="result-line" id="result-line"></div>
+  <div id="catalog"></div>
+</main>
+
+<div class="tray" id="tray">
+  <div class="tray-inner">
+    <div class="tray-stat"><strong id="tray-items">0</strong>Items selected</div>
+    <div class="tray-stat"><strong id="tray-units">0</strong>Total units</div>
+    <div class="tray-stat total"><strong id="tray-total">$0.00</strong><span id="tray-basis">Dealer subtotal</span></div>
+    <div class="tray-spacer"></div>
+    <button class="btn-ghost" id="btn-clear">Clear selection</button>
+    <button class="btn-primary" id="btn-quote">Create Quote &rarr;</button>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="header-badge">Quote</span>
+      <h2>Build Quote</h2>
+      <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="pane-left">
+        <div class="field-group">
+          <h3>Pricing Basis</h3>
+          <div class="basis">
+            <label>
+              <input type="radio" name="basis" value="dealer" checked />
+              <span class="name">Dealer</span>
+              <span class="hint">Dealer pricing</span>
+            </label>
+            <label>
+              <input type="radio" name="basis" value="enduser" />
+              <span class="name">End User</span>
+              <span class="hint">Retail pricing</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <h3>Prepared For</h3>
+          <div class="field"><label>Customer / Company</label><input id="q-company" placeholder="Acme Signs LLC" /></div>
+          <div class="field"><label>Contact Name</label><input id="q-contact" placeholder="Jane Doe" /></div>
+          <div class="field"><label>Email</label><input id="q-email" type="email" placeholder="jane@acmesigns.com" /></div>
+          <div class="field"><label>Phone</label><input id="q-phone" placeholder="(555) 123-4567" /></div>
+        </div>
+
+        <div class="field-group">
+          <h3>Quote Details</h3>
+          <div class="field"><label>Quote Number</label><input id="q-number" /></div>
+          <div class="field-2">
+            <div class="field"><label>Date</label><input id="q-date" type="date" /></div>
+            <div class="field"><label>Valid Until</label><input id="q-valid" type="date" /></div>
+          </div>
+          <div class="field"><label>Prepared By</label><input id="q-preparer" placeholder="Your name" /></div>
+        </div>
+
+        <div class="field-group">
+          <h3>Adjustments</h3>
+          <div class="field-2">
+            <div class="field"><label>Quote Discount %</label><input id="q-discount" type="number" min="0" max="100" step="0.1" value="0" /></div>
+            <div class="field"><label>Tax Rate %</label><input id="q-tax" type="number" min="0" step="0.001" value="0" /></div>
+          </div>
+          <div class="field"><label>Shipping ($)</label><input id="q-shipping" type="number" min="0" step="0.01" value="0" /></div>
+        </div>
+
+        <div class="field-group" style="margin-bottom:0;">
+          <h3>Terms &amp; Notes</h3>
+          <div class="field"><textarea id="q-terms"></textarea></div>
+        </div>
+      </div>
+
+      <div class="pane-right">
+        <div class="lines-head">
+          <h3>Line Items</h3>
+          <span id="lines-count"></span>
+        </div>
+        <table class="lines">
+          <thead>
+            <tr>
+              <th style="width:38%">Item</th>
+              <th class="hide-sm">Gen</th>
+              <th style="width:78px">Qty</th>
+              <th class="num">Unit</th>
+              <th style="width:78px">Disc %</th>
+              <th class="num">Extended</th>
+              <th style="width:28px"></th>
+            </tr>
+          </thead>
+          <tbody id="lines-body"></tbody>
+        </table>
+
+        <div class="totals" id="totals"></div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <span class="msg" id="modal-msg"></span>
+      <button class="btn-ghost" id="btn-back">Back to Catalog</button>
+      <button class="btn-primary" id="btn-preview">Preview Quote &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-bar">
+    <span class="lb-part" id="lb-part"></span>
+    <span class="lb-desc" id="lb-desc"></span>
+    <a id="lb-open" href="#" target="_blank" rel="noopener">Open in new tab</a>
+    <button class="lb-close" id="lb-close" aria-label="Close">&times;</button>
+  </div>
+  <img id="lb-img" src="" alt="" />
+  <p class="lightbox-tip">
+    <strong>Right-click the image</strong> to copy or save it &nbsp;·&nbsp; press <strong>Esc</strong> to close
+  </p>
+</div>
+
+<footer>
+  <p>Impact LED Signs &nbsp;·&nbsp; <span>Internal Use Only — Technician Tool</span>
+     &nbsp;·&nbsp; Price list revised September 10, 2026</p>
+</footer>
+
+<script id="item-data" type="application/json">{"generated": "2026-09-10", "generations": ["G1", "G2", "G3", "G4", "G5", "Video Wall"], "categories": ["Modules", "Receivers", "Controllers", "Hubs", "Power", "Cabling", "Cellular & WiFi", "Sensors", "Tools & Misc"], "items": [{"id": "1123-c3pro-controller-1123-controller", "part": "1123 (C3Pro) Controller", "desc": "1123 Controller", "gens": ["G1", "G2", "G3", "G4", "G5"], "cat": "Controllers", "dealer": 540.0, "enduser": 772.2, "image": "images/CONTROLLER - 1123.png"}, {"id": "4g-cradlepoint-ibr200-cellular-modem-modem-only", "part": "4G Cradlepoint IBR200", "desc": "Cellular Modem, Modem Only", "gens": ["G1", "G2", "G3", "G4"], "cat": "Cellular & WiFi", "dealer": 500.0, "enduser": 715.0, "image": "images/4G - IBR200.png"}, {"id": "4g-cradlepoint-ibr200-cellular-modem-1-yr-service", "part": "4G Cradlepoint IBR200", "desc": "Cellular Modem, 1 Yr Service", "gens": ["G1", "G2"], "cat": "Cellular & WiFi", "dealer": 1043.88, "enduser": 1310.15, "image": "images/4G - IBR200.png"}, {"id": "4g-cradlepoint-ibr200-cellular-modem-1-yr-service-2", "part": "4G Cradlepoint IBR200", "desc": "Cellular Modem, 1 Yr Service", "gens": ["G3", "G4"], "cat": "Cellular & WiFi", "dealer": 750.0, "enduser": 1072.5, "image": "images/4G - IBR200.png"}, {"id": "4g-cradlepoint-ibr200-cellular-modem-5-yr-service", "part": "4G Cradlepoint IBR200", "desc": "Cellular Modem, 5 Yr Service", "gens": ["G1", "G2"], "cat": "Cellular & WiFi", "dealer": 1293.88, "enduser": 2025.15, "image": "images/4G - IBR200.png"}, {"id": "4g-cradlepoint-ibr200-cellular-modem-5-yr-service-2", "part": "4G Cradlepoint IBR200", "desc": "Cellular Modem, 5 Yr Service", "gens": ["G3", "G4"], "cat": "Cellular & WiFi", "dealer": 1250.0, "enduser": 1787.5, "image": "images/4G - IBR200.png"}, {"id": "4g-cradlepoint-ibr200-cellular-modem-lifetime-service", "part": "4G Cradlepoint IBR200", "desc": "Cellular Modem, Lifetime Service", "gens": ["G1", "G2"], "cat": "Cellular & WiFi", "dealer": 2043.88, "enduser": 3097.65, "image": "images/4G - IBR200.png"}, {"id": "4g-cradlepoint-ibr200-cellular-modem-lifetime-service-2", "part": "4G Cradlepoint IBR200", "desc": "Cellular Modem, Lifetime Service", "gens": ["G3", "G4"], "cat": "Cellular & WiFi", "dealer": 2000.0, "enduser": 2860.0, "image": "images/4G - IBR200.png"}, {"id": "4g-antennas-high-gain-4g-modem-antennas", "part": "4G-Antennas", "desc": "High Gain 4G Modem antennas", "gens": ["G1", "G2", "G3", "G4"], "cat": "Cellular & WiFi", "dealer": 49.75, "enduser": 71.14, "image": null}, {"id": "cloudps-12v-12v-power-source-for-cloud", "part": "CLOUDPS-12V", "desc": "12v Power Source for cloud", "gens": ["G1", "G2", "G3"], "cat": "Power", "dealer": 112.5, "enduser": 160.88, "image": null}, {"id": "ethernet-msl-primary-secondary-cable-long", "part": "Ethernet - MSL", "desc": "Primary Secondary Cable (LONG)", "gens": ["G1", "G2", "G3", "G4", "G5"], "cat": "Cabling", "dealer": 22.5, "enduser": 32.18, "image": null}, {"id": "ethernet-mss-primary-secondary-cable", "part": "Ethernet - MSS", "desc": "Primary Secondary Cable", "gens": ["G1", "G2", "G3", "G4", "G5"], "cat": "Cabling", "dealer": 15.0, "enduser": 21.45, "image": null}, {"id": "ethernet-swl-single-sided-weather-proof-cable-long", "part": "Ethernet - SWL", "desc": "Single Sided Weather Proof Cable (LONG)", "gens": ["G1", "G2", "G3", "G4", "G5"], "cat": "Cabling", "dealer": 37.5, "enduser": 53.63, "image": null}, {"id": "ethernet-sws-sinle-sided-weather-proof-cable-short", "part": "Ethernet - SWS", "desc": "Sinle Sided Weather Proof Cable (SHORT)", "gens": ["G1", "G2", "G3", "G4", "G5"], "cat": "Cabling", "dealer": 25.0, "enduser": 35.75, "image": null}, {"id": "ethernet-surge-protector-ethernet-surge-protector", "part": "ETHERNET-SURGE-PROTECTOR", "desc": "Ethernet Surge Protector", "gens": ["G1", "G2", "G3", "G4", "G5"], "cat": "Cabling", "dealer": 125.0, "enduser": 150.0, "image": null}, {"id": "hub-40a-40a-hub-card", "part": "HUB-40A", "desc": "40A hub card", "gens": ["G1"], "cat": "Hubs", "dealer": 42.0, "enduser": 60.06, "image": "images/HUB - 40A.png"}, {"id": "hub-p16-20x20-p16-20x20-hub-card", "part": "HUB-P16-20x20", "desc": "P16 20x20 hub card", "gens": ["G1"], "cat": "Hubs", "dealer": 42.0, "enduser": 60.06, "image": null}, {"id": "hub-p16-320-p16-320-hub-card", "part": "HUB-P16-320", "desc": "P16 320 hub card", "gens": ["G1"], "cat": "Hubs", "dealer": 42.0, "enduser": 60.06, "image": "images/HUB - P16320.png"}, {"id": "hub-p16-336-p16-336-hub-card", "part": "HUB-P16-336", "desc": "P16 336 Hub Card", "gens": ["G1"], "cat": "Hubs", "dealer": 42.0, "enduser": 60.06, "image": null}, {"id": "l-d-1-10-r-32x32-g1-10mm-rgb", "part": "L-D-1-10-R-32x32", "desc": "G1 10mm RGB", "gens": ["G1"], "cat": "Modules", "dealer": 340.0, "enduser": 486.2, "image": null}, {"id": "l-d-1-16-r-20x20-g1-16mm-rgb", "part": "L-D-1-16-R-20x20", "desc": "G1 16mm RGB", "gens": ["G1"], "cat": "Modules", "dealer": 270.0, "enduser": 386.1, "image": null}, {"id": "l-d-1-16-v-20x20-g1-16mm-rrgb", "part": "L-D-1-16-V-20x20", "desc": "G1 16mm RRGB", "gens": ["G1"], "cat": "Modules", "dealer": 345.0, "enduser": 493.35, "image": null}, {"id": "l-d-1-20-r-16x16-g1-20mm-rgb", "part": "L-D-1-20-R-16x16", "desc": "G1 20mm RGB", "gens": ["G1"], "cat": "Modules", "dealer": 200.0, "enduser": 286.0, "image": null}, {"id": "l-d-1-20-v-16x16-g1-20mm-rrgb", "part": "L-D-1-20-V-16x16", "desc": "G1 20mm RRGB", "gens": ["G1"], "cat": "Modules", "dealer": 250.0, "enduser": 357.5, "image": null}, {"id": "lrs-350-5-5v-tile-power-source-g1-and-g2", "part": "LRS-350-5", "desc": "5V Tile Power Source - G1 and G2", "gens": ["G1", "G2"], "cat": "Power", "dealer": 200.0, "enduser": 286.0, "image": "images/POWER - LRS-350-5.png"}, {"id": "mod-tool-g1-g1-wrench-2mm-square", "part": "MOD-TOOL-G1", "desc": "G1 Wrench - 2mm Square", "gens": ["G1"], "cat": "Tools & Misc", "dealer": 25.0, "enduser": 35.75, "image": null}, {"id": "poe-box-poe-injector", "part": "POE-BOX", "desc": "POE Injector", "gens": ["G1", "G2", "G3"], "cat": "Cabling", "dealer": 25.0, "enduser": 35.75, "image": null}, {"id": "rec-5a75e-i5a-75e-receiver", "part": "REC-5A75E", "desc": "i5A-75E Receiver", "gens": ["G1", "G2"], "cat": "Receivers", "dealer": 102.0, "enduser": 145.86, "image": "images/REC - I5A75E.png"}, {"id": "rec-i5a-i5a-receiver", "part": "REC-i5A", "desc": "i5A Receiver", "gens": ["G1"], "cat": "Receivers", "dealer": 102.0, "enduser": 145.86, "image": "images/REC - I5A.png"}, {"id": "term-block-g1-terminal-block-for-g1-sign", "part": "TERM-BLOCK-G1", "desc": "Terminal Block for G1 Sign", "gens": ["G1"], "cat": "Tools & Misc", "dealer": 50.0, "enduser": 71.5, "image": null}, {"id": "usba-usbb-usb-a-to-usb-b-cord", "part": "USBA-USBB", "desc": "USB-A to USB-B cord", "gens": ["G1", "G2", "G3"], "cat": "Cabling", "dealer": 7.45, "enduser": 10.65, "image": null}, {"id": "wifi-bracket-wifi-bracket", "part": "WIFI-BRACKET", "desc": "Wifi Bracket", "gens": ["G1", "G2", "G3"], "cat": "Cellular & WiFi", "dealer": 12.5, "enduser": 17.88, "image": null}, {"id": "wifi-ubiquity-radio-wifi-radio-pair", "part": "WIFI-Ubiquity Radio", "desc": "Wifi Radio (Pair)", "gens": ["G1", "G2", "G3", "G4", "G5"], "cat": "Cellular & WiFi", "dealer": 300.0, "enduser": 500.0, "image": "images/WIFI - NANOSTATIONM2.png"}, {"id": "cable-blue-3-3-blue-ethernet-cord", "part": "CABLE-BLUE-3", "desc": "3' Blue ethernet cord", "gens": ["G2"], "cat": "Cabling", "dealer": 4.7, "enduser": 6.72, "image": null}, {"id": "guide-install-g2-g2-install-guide", "part": "Guide - Install G2", "desc": "G2 Install Guide", "gens": ["G2"], "cat": "Tools & Misc", "dealer": 5.0, "enduser": 7.15, "image": null}, {"id": "guide-ms-guide-master-slave-connection-guide", "part": "Guide - MS Guide", "desc": "Master Slave Connection Guide", "gens": ["G2"], "cat": "Tools & Misc", "dealer": 5.0, "enduser": 7.15, "image": null}, {"id": "guide-wifi-wfi-kit-install-guide", "part": "Guide - Wifi", "desc": "Wfi kit install guide", "gens": ["G2", "G3", "G4"], "cat": "Tools & Misc", "dealer": 5.0, "enduser": 7.15, "image": null}, {"id": "lightsensor-light-sensor", "part": "LIGHTSENSOR", "desc": "Light Sensor", "gens": ["G2", "G3", "G5"], "cat": "Sensors", "dealer": 315.0, "enduser": 450.45, "image": null}, {"id": "m-g2-10-g2-10mm-rgb", "part": "M-G2-10", "desc": "G2 10mm RGB", "gens": ["G2"], "cat": "Modules", "dealer": 257.0, "enduser": 367.51, "image": null}, {"id": "m-g2-16-g2-16mm-rgb", "part": "M-G2-16", "desc": "G2 16mm RGB", "gens": ["G2"], "cat": "Modules", "dealer": 200.0, "enduser": 286.0, "image": null}, {"id": "m-g2-20-g2-20mm-rgb", "part": "M-G2-20", "desc": "G2 20mm RGB", "gens": ["G2"], "cat": "Modules", "dealer": 172.5, "enduser": 246.68, "image": null}, {"id": "m-g2-6-g2-6mm-rgb", "part": "M-G2-6", "desc": "G2 6mm RGB", "gens": ["G2"], "cat": "Modules", "dealer": 300.0, "enduser": 429.0, "image": null}, {"id": "mod-tool-g2-3mm-hex-wrench", "part": "MOD-TOOL-G2", "desc": "3mm Hex Wrench", "gens": ["G2"], "cat": "Tools & Misc", "dealer": 25.0, "enduser": 35.75, "image": null}, {"id": "mod-tool-g2-2-5-2-5-mm-hex-wrench", "part": "MOD-TOOL-G2-2.5", "desc": "2.5 mm Hex Wrench", "gens": ["G2"], "cat": "Tools & Misc", "dealer": 25.0, "enduser": 35.75, "image": null}, {"id": "usb-mencom-waterproof-usb-built-into-mencom-box", "part": "USB-MENCOM", "desc": "Waterproof USB built into Mencom box", "gens": ["G2", "G3"], "cat": "Cabling", "dealer": 307.76, "enduser": 440.09, "image": null}, {"id": "m-g3-10-g3-10mmrgb", "part": "M-G3-10", "desc": "G3 10mmRGB", "gens": ["G3"], "cat": "Modules", "dealer": 366.5, "enduser": 524.1, "image": null}, {"id": "m-g3-15-g3-15mmrgb", "part": "M-G3-15", "desc": "G3 15mmRGB", "gens": ["G3"], "cat": "Modules", "dealer": 269.5, "enduser": 385.39, "image": null}, {"id": "m-g3-20-g3-20mmrgb", "part": "M-G3-20", "desc": "G3 20mmRGB", "gens": ["G3"], "cat": "Modules", "dealer": 197.5, "enduser": 282.43, "image": null}, {"id": "m-g3-6-g3-6mmrgb", "part": "M-G3-6", "desc": "G3 6mmRGB", "gens": ["G3"], "cat": "Modules", "dealer": 395.0, "enduser": 564.85, "image": null}, {"id": "power-supply-great-wall-3-8-v", "part": "Power Supply", "desc": "Great Wall 3.8 V", "gens": ["G3"], "cat": "Power", "dealer": 140.0, "enduser": 200.2, "image": null}, {"id": "power-breaker-g3-g3-internal-power-breaker", "part": "POWER-BREAKER-G3", "desc": "G3 Internal Power Breaker", "gens": ["G3"], "cat": "Power", "dealer": 112.5, "enduser": 135.0, "image": null}, {"id": "power-g3-v2-mean-well-3-8v", "part": "POWER-G3-V2", "desc": "Mean Well 3.8V", "gens": ["G3"], "cat": "Power", "dealer": 105.0, "enduser": 126.0, "image": null}, {"id": "rec-907-g3-cabinet-receive-card", "part": "REC-907", "desc": "G3 Cabinet Receive Card", "gens": ["G3"], "cat": "Receivers", "dealer": 102.0, "enduser": 145.86, "image": "images/REC - i5-907.png"}, {"id": "rec-i5-g3-cabinet-receive-card", "part": "REC-i5+", "desc": "G3 Cabinet Receive Card", "gens": ["G3"], "cat": "Receivers", "dealer": 102.0, "enduser": 145.86, "image": "images/REC - i5+.png"}, {"id": "surge-protector-g3-g3-internal-surge-protector", "part": "SURGE-PROTECTOR-G3", "desc": "G3 Internal Surge Protector", "gens": ["G3"], "cat": "Power", "dealer": 35.79, "enduser": 42.95, "image": null}, {"id": "4g-digiwr11xt-4g-modem-digi-wr11-xt", "part": "4G-DIGIWR11XT", "desc": "4G Modem, Digi WR11 XT", "gens": ["G4"], "cat": "Cellular & WiFi", "dealer": 800.0, "enduser": 1144.0, "image": "images/4G - DIGI.png"}, {"id": "bag-parts-parts-bag-for-shipping", "part": "BAG-PARTS", "desc": "Parts bag for shipping", "gens": ["G4"], "cat": "Tools & Misc", "dealer": 5.0, "enduser": 7.15, "image": null}, {"id": "cable-g4-module-cable-g4-module", "part": "Cable-G4-Module", "desc": "Cable-G4-Module", "gens": ["G4"], "cat": "Cabling", "dealer": 40.0, "enduser": 50.0, "image": null}, {"id": "cb-g4-communication-v4-g4-communication-box", "part": "CB-G4-COMMUNICATION-V4", "desc": "G4 Communication Box", "gens": ["G4"], "cat": "Controllers", "dealer": 100.0, "enduser": 120.0, "image": null}, {"id": "cb-g4-controller-v3-g4-control-box", "part": "CB-G4-CONTROLLER-V3", "desc": "G4 Control Box", "gens": ["G4"], "cat": "Controllers", "dealer": 125.0, "enduser": 150.0, "image": null}, {"id": "lightsensor-light-sensor-for-psd-100-and-msd-300", "part": "LIGHTSENSOR", "desc": "Light Sensor for PSD 100 and MSD 300", "gens": ["G4"], "cat": "Sensors", "dealer": 315.0, "enduser": 450.45, "image": null}, {"id": "m-g4-15-g4-15mm-rgb", "part": "M-G4-15", "desc": "G4 15mm RGB", "gens": ["G4"], "cat": "Modules", "dealer": 190.0, "enduser": 271.7, "image": null}, {"id": "m-g4-4-g4-4mm-rgb", "part": "M-G4-4", "desc": "G4 4mm RGB", "gens": ["G4"], "cat": "Modules", "dealer": 565.0, "enduser": 807.95, "image": null}, {"id": "m-g4-6-g4-6mm-rgb", "part": "M-G4-6", "desc": "G4 6mm RGB", "gens": ["G4"], "cat": "Modules", "dealer": 455.0, "enduser": 650.65, "image": null}, {"id": "m-g4-9-g4-9mm-rgb", "part": "M-G4-9", "desc": "G4 9mm RGB", "gens": ["G4"], "cat": "Modules", "dealer": 305.0, "enduser": 436.15, "image": null}, {"id": "pb-g4-5l-power-box-5-port-long", "part": "PB-G4-5L", "desc": "Power Box - 5 port long", "gens": ["G4"], "cat": "Power", "dealer": 338.0, "enduser": 405.0, "image": null}, {"id": "pb-g4-5s-power-box-5-port-short", "part": "PB-G4-5S", "desc": "Power Box- 5 port short", "gens": ["G4"], "cat": "Power", "dealer": 355.0, "enduser": 426.0, "image": null}, {"id": "pb-g4-8-power-box-8-port", "part": "PB-G4-8", "desc": "Power Box- 8 port", "gens": ["G4"], "cat": "Power", "dealer": 375.0, "enduser": 450.0, "image": null}, {"id": "4g-s400-cradlepoint-s400-modem", "part": "4G-S400", "desc": "Cradlepoint S400 Modem", "gens": ["G5"], "cat": "Cellular & WiFi", "dealer": 793.88, "enduser": 952.65, "image": "images/4G - S400.png"}, {"id": "4g-s400-cellular-modem-1-yr-service", "part": "4G-S400", "desc": "Cellular Modem, 1 Yr Service", "gens": ["G5"], "cat": "Cellular & WiFi", "dealer": 1043.88, "enduser": 1310.15, "image": "images/4G - S400.png"}, {"id": "4g-s400-cellular-modem-5-yr-service", "part": "4G-S400", "desc": "Cellular Modem, 5 Yr Service", "gens": ["G5"], "cat": "Cellular & WiFi", "dealer": 1293.88, "enduser": 2025.15, "image": "images/4G - S400.png"}, {"id": "4g-s400-cellular-modem-lifetime-service", "part": "4G-S400", "desc": "Cellular Modem, Lifetime Service", "gens": ["G5"], "cat": "Cellular & WiFi", "dealer": 2043.88, "enduser": 3097.65, "image": "images/4G - S400.png"}, {"id": "cb-g5-com-g5-combox", "part": "CB-G5-COM", "desc": "G5 Combox", "gens": ["G5"], "cat": "Controllers", "dealer": 112.5, "enduser": 135.0, "image": null}, {"id": "cb-g5-ctrl-g5-control-box", "part": "CB-G5-CTRL", "desc": "G5 Control Box", "gens": ["G5"], "cat": "Controllers", "dealer": 262.5, "enduser": 315.0, "image": null}, {"id": "cbr-g5-cbr-g5-26011901-54", "part": "CBR-G5", "desc": "CBR-G5-26011901-54", "gens": ["G5"], "cat": "Controllers", "dealer": null, "enduser": null, "image": null}, {"id": "hub-g5-2-hub-g5-2-26011901-09", "part": "HUB-G5-2", "desc": "HUB-G5-2-26011901-09", "gens": ["G5"], "cat": "Hubs", "dealer": 33.75, "enduser": 40.5, "image": null}, {"id": "hub-g5-3-hub-g5-3-26011901-10", "part": "HUB-G5-3", "desc": "HUB-G5-3-26011901-10", "gens": ["G5"], "cat": "Hubs", "dealer": 53.63, "enduser": 64.35, "image": null}, {"id": "hub-g5-4-hub-g5-4-26011901-11", "part": "HUB-G5-4", "desc": "HUB-G5-4-26011901-11", "gens": ["G5"], "cat": "Hubs", "dealer": 72.15, "enduser": 86.58, "image": null}, {"id": "hub-g5-indv-single-g5-hub-used-in-3-high-cabinets", "part": "Hub-G5-Indv", "desc": "Single G5 Hub used in 3-high cabinets.", "gens": ["G5"], "cat": "Hubs", "dealer": null, "enduser": null, "image": null}, {"id": "m-g5-1-56-m-g5-1-56-26013001-04", "part": "M-G5-1.56", "desc": "M-G5-1.56-26013001 -04", "gens": ["G5"], "cat": "Modules", "dealer": 83.25, "enduser": 99.9, "image": null}, {"id": "m-g5-15-g5-15mm-rgb", "part": "M-G5-15", "desc": "G5 15mm RGB", "gens": ["G5"], "cat": "Modules", "dealer": 210.0, "enduser": 300.3, "image": null}, {"id": "m-g5-4-g5-4mm-rgb", "part": "M-G5-4", "desc": "G5 4mm RGB", "gens": ["G5"], "cat": "Modules", "dealer": 600.0, "enduser": 858.0, "image": null}, {"id": "m-g5-6-g5-6mm-rgb", "part": "M-G5-6", "desc": "G5 6mm RGB", "gens": ["G5"], "cat": "Modules", "dealer": 375.0, "enduser": 536.25, "image": null}, {"id": "m-g5-9-g5-9mm-rgb", "part": "M-G5-9", "desc": "G5 9mm RGB", "gens": ["G5"], "cat": "Modules", "dealer": 300.0, "enduser": 429.0, "image": null}, {"id": "pb-g5-2-pb-g5-2-26011901-05", "part": "PB-G5-2", "desc": "PB-G5-2-26011901-05", "gens": ["G5"], "cat": "Power", "dealer": 316.25, "enduser": 379.5, "image": null}, {"id": "pb-g5-3-d-3-wide-power-bar-with-two-power-supplies", "part": "PB-G5-3-D", "desc": "3 Wide power bar with two power supplies", "gens": ["G5"], "cat": "Power", "dealer": 512.5, "enduser": 615.0, "image": null}, {"id": "pb-g5-3-s-3-wide-power-bar-with-one-power-supply", "part": "PB-G5-3-S", "desc": "3 Wide power bar with one power supply", "gens": ["G5"], "cat": "Power", "dealer": 383.0, "enduser": 459.6, "image": null}, {"id": "pb-g5-4-pb-g5-4-26011901-07", "part": "PB-G5-4", "desc": "PB-G5-4-26011901-07", "gens": ["G5"], "cat": "Power", "dealer": 570.0, "enduser": 684.0, "image": null}, {"id": "pwr-g5-mcp200-vcab-pwr-g5-mcp200-vcab", "part": "PWR-G5-MCP200-VCAB", "desc": "PWR-G5-MCP200-VCAB", "gens": ["G5", "Video Wall"], "cat": "Power", "dealer": 37.5, "enduser": 45.0, "image": null}, {"id": "m-g4-1-5-video-wall-1-5mm-rgb", "part": "M-G4-1.5", "desc": "Video Wall 1.5mm RGB", "gens": ["Video Wall"], "cat": "Modules", "dealer": 300.0, "enduser": 429.0, "image": null}, {"id": "m-g4-1-8-video-wall-1-8mm-rgb", "part": "M-G4-1.8", "desc": "Video Wall 1.8mm RGB", "gens": ["Video Wall"], "cat": "Modules", "dealer": 312.5, "enduser": 446.88, "image": null}, {"id": "m-g4-1-91-video-wall-1-91mm-rgb", "part": "M-G4-1.91", "desc": "Video Wall 1.91mm RGB", "gens": ["Video Wall"], "cat": "Modules", "dealer": 325.0, "enduser": 464.75, "image": null}, {"id": "m-g4-2-video-wall-2mm-rgb", "part": "M-G4-2", "desc": "Video Wall 2mm RGB", "gens": ["Video Wall"], "cat": "Modules", "dealer": 250.0, "enduser": 357.5, "image": null}, {"id": "m-g4-2-5-video-wall-2-5mm-rgb", "part": "M-G4-2 .5", "desc": "Video Wall 2.5mm RGB", "gens": ["Video Wall"], "cat": "Modules", "dealer": 175.0, "enduser": 250.25, "image": null}, {"id": "m-g4-2-6-video-wall-2-6mm-rgb", "part": "M-G4-2.6", "desc": "Video Wall 2.6mm RGB", "gens": ["Video Wall"], "cat": "Modules", "dealer": 175.0, "enduser": 250.25, "image": null}, {"id": "m-g4-3-91-video-wall-3-91mm-rgb", "part": "M-G4-3.91", "desc": "Video Wall 3.91mm RGB", "gens": ["Video Wall"], "cat": "Modules", "dealer": 120.0, "enduser": 171.6, "image": null}, {"id": "magnet-tool-module-removal-tool", "part": "MAGNET-TOOL", "desc": "Module Removal Tool", "gens": ["Video Wall"], "cat": "Tools & Misc", "dealer": null, "enduser": null, "image": null}, {"id": "controller-x100-pro-7u-controller-x100-pro-7u", "part": "CONTROLLER-X100-PRO-7U", "desc": "CONTROLLER-X100-PRO-7U", "gens": ["Video Wall"], "cat": "Controllers", "dealer": null, "enduser": null, "image": null}, {"id": "controller-a200-controller-a200", "part": "CONTROLLER-A200", "desc": "CONTROLLER-A200", "gens": ["Video Wall"], "cat": "Controllers", "dealer": 1340.0, "enduser": 1926.25, "image": null}, {"id": "rec-k5-g4-rec-k5-g4", "part": "REC-K5+-G4", "desc": "REC-K5+-G4", "gens": ["Video Wall"], "cat": "Receivers", "dealer": null, "enduser": null, "image": null}, {"id": "hub-a3-g4-vcab-hub-a3-g4-vcab", "part": "HUB-A3-G4-VCAB", "desc": "HUB-A3-G4-VCAB", "gens": ["Video Wall"], "cat": "Hubs", "dealer": 37.5, "enduser": 45.0, "image": null}, {"id": "hub-b1-g4-vcab-hub-b1-g4-vcab", "part": "HUB-B1-G4-VCAB", "desc": "HUB-B1-G4-VCAB", "gens": ["Video Wall"], "cat": "Hubs", "dealer": 58.33, "enduser": 69.99, "image": null}, {"id": "power-dsp-300k-vcab-power-dsp-300k-vcab", "part": "POWER-DSP-300K-VCAB", "desc": "POWER-DSP-300K-VCAB", "gens": ["Video Wall"], "cat": "Power", "dealer": 62.5, "enduser": 75.0, "image": null}, {"id": "power-dsp-200k-vcab-power-dsp-200k-vcab", "part": "POWER-DSP-200K-VCAB", "desc": "POWER-DSP-200K-VCAB", "gens": ["Video Wall"], "cat": "Power", "dealer": 62.5, "enduser": 75.0, "image": null}, {"id": "hub-a1-g4-vcab-hub-a1-g4-vcab", "part": "HUB-A1-G4-VCAB", "desc": "HUB-A1-G4-VCAB", "gens": ["Video Wall"], "cat": "Hubs", "dealer": null, "enduser": null, "image": null}, {"id": "hub-b2-g4-vcab-hub-b2-g4-vcab", "part": "HUB-B2-G4-VCAB", "desc": "HUB-B2-G4-VCAB", "gens": ["Video Wall"], "cat": "Hubs", "dealer": null, "enduser": null, "image": null}, {"id": "cable-power-input-g4-vcab-cable-power-input-g4-vcab", "part": "CABLE-POWER-INPUT-G4-VCAB", "desc": "CABLE-POWER-INPUT-G4-VCAB", "gens": ["Video Wall"], "cat": "Cabling", "dealer": null, "enduser": null, "image": null}, {"id": "m-g4-vcab-3-m-g4-vcab-3", "part": "M-G4-VCAB-3", "desc": "M-G4-VCAB-3", "gens": ["Video Wall"], "cat": "Modules", "dealer": 65.0, "enduser": 78.0, "image": null}, {"id": "power-g4-vcab-power-g4-vcab", "part": "POWER-G4-VCAB", "desc": "POWER-G4-VCAB", "gens": ["Video Wall"], "cat": "Power", "dealer": 45.0, "enduser": 54.0, "image": null}]}</script>
+<script>
+(function () {
+  'use strict';
+
+  var DATA  = JSON.parse(document.getElementById('item-data').textContent);
+  var ITEMS = DATA.items;
+  var BY_ID = {};
+  ITEMS.forEach(function (it) { BY_ID[it.id] = it; });
+
+  var LS_SEL   = 'impact.quote.selection';
+  var LS_PREP  = 'impact.quote.preparer';
+  var LS_SEQ   = 'impact.quote.seq';
+
+  var DEFAULT_TERMS =
+    'Pricing is valid through the date shown above and is subject to change thereafter. ' +
+    'Quoted prices do not include installation labor unless explicitly listed as a line item. ' +
+    'Freight is estimated and will be confirmed at time of order. ' +
+    'All parts carry the standard Impact LED Signs warranty.';
+
+  var state = {
+    search: '',
+    gen: 'all',
+    cat: 'all',
+    missingOnly: false,
+    priceView: 'both',
+    basis: 'dealer',
+    sel: loadSelection()
+  };
+
+  // ---------------------------------------------------------------- helpers
+  function money(n) {
+    return '$' + Number(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+  function norm(s) { return String(s || '').toLowerCase().replace(/[\s\-_.]+/g, ''); }
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function priceable(it) { return it.dealer != null || it.enduser != null; }
+  function unitPrice(it, basis) {
+    var p = basis === 'enduser' ? it.enduser : it.dealer;
+    return p == null ? 0 : p;
+  }
+  function genShort(g) { return g === 'Video Wall' ? 'VW' : g; }
+  function absUrl(path) {
+    try { return new URL(path, document.baseURI).href; } catch (e) { return path; }
+  }
+
+  function loadSelection() {
+    try {
+      var raw = JSON.parse(localStorage.getItem(LS_SEL) || '{}');
+      var out = {};
+      Object.keys(raw).forEach(function (id) {
+        if (BY_ID[id]) {
+          out[id] = {
+            qty: Math.max(1, parseInt(raw[id].qty, 10) || 1),
+            disc: Math.min(100, Math.max(0, parseFloat(raw[id].disc) || 0))
+          };
+        }
+      });
+      return out;
+    } catch (e) { return {}; }
+  }
+  function saveSelection() {
+    try { localStorage.setItem(LS_SEL, JSON.stringify(state.sel)); } catch (e) {}
+  }
+
+  // ---------------------------------------------------------------- filtering
+  function matches(it) {
+    if (state.gen !== 'all' && it.gens.indexOf(state.gen) === -1) return false;
+    if (state.cat !== 'all' && it.cat !== state.cat) return false;
+    if (state.missingOnly && it.image) return false;
+    if (state.search) {
+      var q = norm(state.search);
+      if (norm(it.part).indexOf(q) === -1 && norm(it.desc).indexOf(q) === -1) return false;
+    }
+    return true;
+  }
+
+  function countFor(overrides) {
+    var saved = { gen: state.gen, cat: state.cat, missingOnly: state.missingOnly };
+    Object.keys(overrides).forEach(function (k) { state[k] = overrides[k]; });
+    var n = ITEMS.filter(matches).length;
+    state.gen = saved.gen; state.cat = saved.cat; state.missingOnly = saved.missingOnly;
+    return n;
+  }
+
+  // ---------------------------------------------------------------- chips
+  function buildChips() {
+    var genRow = document.getElementById('gen-chips');
+    var catRow = document.getElementById('cat-chips');
+
+    function chip(row, label, active, onClick, extraClass) {
+      var b = document.createElement('button');
+      b.className = 'chip' + (active ? ' on' : '') + (extraClass ? ' ' + extraClass : '');
+      b.innerHTML = label;
+      b.addEventListener('click', onClick);
+      row.appendChild(b);
+      return b;
+    }
+
+    genRow.querySelectorAll('.chip').forEach(function (c) { c.remove(); });
+    catRow.querySelectorAll('.chip').forEach(function (c) { c.remove(); });
+
+    chip(genRow, 'All <span class="count">' + countFor({ gen: 'all' }) + '</span>',
+      state.gen === 'all', function () { state.gen = 'all'; render(); });
+    DATA.generations.forEach(function (g) {
+      chip(genRow, esc(g) + ' <span class="count">' + countFor({ gen: g }) + '</span>',
+        state.gen === g, function () { state.gen = g; render(); });
+    });
+
+    chip(catRow, 'All <span class="count">' + countFor({ cat: 'all' }) + '</span>',
+      state.cat === 'all', function () { state.cat = 'all'; render(); });
+    DATA.categories.forEach(function (c) {
+      chip(catRow, esc(c) + ' <span class="count">' + countFor({ cat: c }) + '</span>',
+        state.cat === c, function () { state.cat = c; render(); });
+    });
+
+    var missing = countFor({ missingOnly: true });
+    chip(catRow, 'Missing image <span class="count">' + missing + '</span>',
+      state.missingOnly, function () { state.missingOnly = !state.missingOnly; render(); }, 'alert');
+  }
+
+  // ---------------------------------------------------------------- catalog
+  function cardHTML(it) {
+    var sel = state.sel[it.id];
+    var qty = sel ? sel.qty : 1;
+    var ok  = priceable(it);
+    var pv  = state.priceView;
+
+    var img = it.image
+      ? '<img src="' + esc(it.image) + '" alt="' + esc(it.part) + '" loading="lazy" data-act="zoom" />' +
+        '<span class="zoom-hint">Click to enlarge</span>'
+      : '<div class="placeholder"><span class="mono">' + esc(it.part) +
+        '</span><span class="note">No photo</span></div>';
+
+    var tags = it.gens.map(function (g) {
+      return '<span class="tag">' + esc(genShort(g)) + '</span>';
+    }).join('');
+
+    function priceRow(cls, label, val, hidden) {
+      return '<div class="price-row ' + cls + (hidden ? ' hide' : '') + '">' +
+             '<span class="label">' + label + '</span>' +
+             '<span class="value' + (val == null ? ' none' : '') + '">' +
+             (val == null ? 'TBD' : money(val)) + '</span></div>';
+    }
+
+    return '' +
+      '<div class="card' + (sel ? ' selected' : '') + (ok ? '' : ' tbd') + '" data-id="' + esc(it.id) + '">' +
+        '<div class="card-img">' + img +
+          (ok ? '' : '<span class="tbd-flag">Price TBD</span>') +
+          '<span class="sel-flag">&check;</span>' +
+        '</div>' +
+        '<div class="card-body">' +
+          '<div class="card-part">' + esc(it.part) + '</div>' +
+          (it.desc !== it.part ? '<div class="card-desc">' + esc(it.desc) + '</div>' : '<div class="card-desc"></div>') +
+          '<div class="card-tags">' + tags + '<span class="tag">' + esc(it.cat) + '</span></div>' +
+          '<div class="card-prices">' +
+            priceRow('dealer', 'Dealer', it.dealer, pv === 'enduser') +
+            priceRow('enduser', 'End User', it.enduser, pv === 'dealer') +
+          '</div>' +
+        '</div>' +
+        '<div class="card-actions">' +
+          (ok
+            ? '<div class="qty">' +
+                '<button data-act="dec">&minus;</button>' +
+                '<input type="number" min="1" step="1" value="' + qty + '" data-act="qty" aria-label="Quantity" />' +
+                '<button data-act="inc">+</button>' +
+              '</div>' +
+              '<button class="btn-add' + (sel ? ' added' : '') + '" data-act="add">' +
+                (sel ? 'Added &check;' : 'Add') + '</button>'
+            : '<button class="btn-add" disabled>Not quotable</button>') +
+        '</div>' +
+      '</div>';
+  }
+
+  function render() {
+    buildChips();
+
+    document.querySelectorAll('#price-toggle button').forEach(function (b) {
+      b.classList.toggle('on', b.dataset.view === state.priceView);
+    });
+    document.getElementById('search-clear').style.display = state.search ? 'block' : 'none';
+
+    var visible = ITEMS.filter(matches);
+    var host = document.getElementById('catalog');
+
+    document.getElementById('result-line').innerHTML =
+      '<strong>' + visible.length + '</strong> of ' + ITEMS.length + ' items shown' +
+      (state.search ? ' for &ldquo;' + esc(state.search) + '&rdquo;' : '') +
+      (state.missingOnly ? ' &middot; missing a photo' : '');
+
+    if (!visible.length) {
+      host.innerHTML =
+        '<div class="empty"><h3>No items match</h3>' +
+        '<p>Try a different search term, or clear the generation and category filters.</p></div>';
+      updateTray();
+      return;
+    }
+
+    // Group into sections. A shared part (an Ethernet cable, say) is tagged with
+    // every generation it fits, so it must still render exactly once -- otherwise
+    // the card count disagrees with the filter counts, and filtering to G5 would
+    // draw G1-G4 section headers full of shared parts.
+    var groups;
+    if (state.gen === 'all') {
+      // Each item lands under its primary (first) generation; its tags show the rest.
+      groups = DATA.generations.map(function (g) {
+        return { gen: g, rows: visible.filter(function (it) { return it.gens[0] === g; }) };
+      });
+    } else {
+      groups = [{ gen: state.gen, rows: visible }];
+    }
+
+    var html = '';
+    groups.forEach(function (grp) {
+      if (!grp.rows.length) return;
+      var g = grp.gen;
+      html +=
+        '<section class="gen-section">' +
+          '<div class="gen-header">' +
+            '<span class="gen-badge">' + esc(genShort(g)) + '</span>' +
+            '<h2>' + esc(g === 'Video Wall' ? 'Video Wall' : 'Generation ' + g.slice(1)) + '</h2>' +
+            '<span class="gen-count">' + grp.rows.length + ' items</span>' +
+          '</div>' +
+          '<div class="grid">' + grp.rows.map(cardHTML).join('') + '</div>' +
+        '</section>';
+    });
+    host.innerHTML = html;
+    updateTray();
+  }
+
+  // ---------------------------------------------------------------- tray
+  function selectedItems() {
+    return Object.keys(state.sel).map(function (id) {
+      return { item: BY_ID[id], qty: state.sel[id].qty, disc: state.sel[id].disc };
+    }).filter(function (l) { return l.item; });
+  }
+
+  function updateTray() {
+    var lines = selectedItems();
+    var units = lines.reduce(function (a, l) { return a + l.qty; }, 0);
+    var total = lines.reduce(function (a, l) {
+      return a + unitPrice(l.item, state.basis) * l.qty * (1 - l.disc / 100);
+    }, 0);
+
+    document.getElementById('tray-items').textContent = lines.length;
+    document.getElementById('tray-units').textContent = units;
+    document.getElementById('tray-total').textContent = money(total);
+    document.getElementById('tray-basis').textContent =
+      (state.basis === 'enduser' ? 'End user' : 'Dealer') + ' subtotal';
+    document.getElementById('tray').classList.toggle('show', lines.length > 0);
+    document.body.style.paddingBottom = lines.length ? '' : '0';
+  }
+
+  // ---------------------------------------------------------------- catalog events
+  document.getElementById('catalog').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    var card = e.target.closest('.card');
+    if (!card) return;
+    var id = card.dataset.id;
+    var input = card.querySelector('[data-act="qty"]');
+    var act = btn.dataset.act;
+
+    if (act === 'zoom') { openLightbox(BY_ID[id]); return; }
+
+    if (act === 'inc' || act === 'dec') {
+      var v = Math.max(1, (parseInt(input.value, 10) || 1) + (act === 'inc' ? 1 : -1));
+      input.value = v;
+      if (state.sel[id]) { state.sel[id].qty = v; saveSelection(); updateTray(); }
+      return;
+    }
+
+    if (act === 'add') {
+      if (state.sel[id]) {
+        delete state.sel[id];
+      } else {
+        state.sel[id] = { qty: Math.max(1, parseInt(input.value, 10) || 1), disc: 0 };
+      }
+      saveSelection();
+      card.classList.toggle('selected', !!state.sel[id]);
+      var addBtn = card.querySelector('.btn-add');
+      addBtn.classList.toggle('added', !!state.sel[id]);
+      addBtn.innerHTML = state.sel[id] ? 'Added &check;' : 'Add';
+      updateTray();
+    }
+  });
+
+  document.getElementById('catalog').addEventListener('change', function (e) {
+    if (!e.target.matches('[data-act="qty"]')) return;
+    var card = e.target.closest('.card');
+    var v = Math.max(1, parseInt(e.target.value, 10) || 1);
+    e.target.value = v;
+    if (state.sel[card.dataset.id]) {
+      state.sel[card.dataset.id].qty = v;
+      saveSelection();
+      updateTray();
+    }
+  });
+
+  var searchTimer;
+  document.getElementById('search').addEventListener('input', function (e) {
+    clearTimeout(searchTimer);
+    var v = e.target.value;
+    searchTimer = setTimeout(function () { state.search = v.trim(); render(); }, 140);
+  });
+  document.getElementById('search-clear').addEventListener('click', function () {
+    document.getElementById('search').value = '';
+    state.search = '';
+    render();
+  });
+
+  document.getElementById('price-toggle').addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    state.priceView = b.dataset.view;
+    render();
+  });
+
+  // ---------------------------------------------------------------- lightbox
+  var lightbox = document.getElementById('lightbox');
+
+  function openLightbox(it) {
+    if (!it || !it.image) return;
+    document.getElementById('lb-img').src = it.image;
+    document.getElementById('lb-img').alt = it.part;
+    document.getElementById('lb-part').textContent = it.part;
+    document.getElementById('lb-desc').textContent = it.desc !== it.part ? it.desc : '';
+    document.getElementById('lb-open').href = it.image;
+    lightbox.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    lightbox.classList.remove('show');
+    document.getElementById('lb-img').src = '';
+    // The quote modal may still be open underneath; only release the scroll
+    // lock if nothing else needs it.
+    if (!modal.classList.contains('show')) document.body.style.overflow = '';
+  }
+
+  document.getElementById('lb-close').addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', function (e) {
+    // Clicking the backdrop closes; clicking the image or the toolbar does not.
+    if (e.target === lightbox) closeLightbox();
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', function () {
+    state.sel = {};
+    saveSelection();
+    render();
+  });
+
+  // ---------------------------------------------------------------- quote modal
+  var modal = document.getElementById('modal');
+
+  function nextQuoteNumber() {
+    var d = new Date();
+    var stamp = d.getFullYear() +
+      String(d.getMonth() + 1).padStart(2, '0') +
+      String(d.getDate()).padStart(2, '0');
+    var seq = 1;
+    try { seq = (parseInt(localStorage.getItem(LS_SEQ), 10) || 0) + 1; } catch (e) {}
+    return 'IMP-' + stamp + '-' + String(seq).padStart(3, '0');
+  }
+  function bumpQuoteSeq() {
+    try { localStorage.setItem(LS_SEQ, String((parseInt(localStorage.getItem(LS_SEQ), 10) || 0) + 1)); } catch (e) {}
+  }
+  function isoDate(d) { return d.toISOString().slice(0, 10); }
+
+  function openModal() {
+    if (!selectedItems().length) return;
+    var today = new Date();
+    var valid = new Date(today.getTime() + 30 * 86400000);
+
+    document.getElementById('q-number').value = nextQuoteNumber();
+    document.getElementById('q-date').value = isoDate(today);
+    document.getElementById('q-valid').value = isoDate(valid);
+    if (!document.getElementById('q-terms').value) {
+      document.getElementById('q-terms').value = DEFAULT_TERMS;
+    }
+    try {
+      var prep = localStorage.getItem(LS_PREP);
+      if (prep) document.getElementById('q-preparer').value = prep;
+    } catch (e) {}
+
+    document.querySelector('input[name="basis"][value="' + state.basis + '"]').checked = true;
+    document.getElementById('modal-msg').textContent = '';
+    renderLines();
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+    render();
+  }
+
+  function quoteMath() {
+    var lines = selectedItems().map(function (l) {
+      var unit = unitPrice(l.item, state.basis);
+      return {
+        item: l.item, qty: l.qty, disc: l.disc, unit: unit,
+        ext: unit * l.qty * (1 - l.disc / 100)
+      };
+    });
+    var subtotal = lines.reduce(function (a, l) { return a + l.ext; }, 0);
+    var qDisc  = Math.min(100, Math.max(0, parseFloat(document.getElementById('q-discount').value) || 0));
+    var taxPct = Math.max(0, parseFloat(document.getElementById('q-tax').value) || 0);
+    var ship   = Math.max(0, parseFloat(document.getElementById('q-shipping').value) || 0);
+    var discAmt = subtotal * (qDisc / 100);
+    var afterDisc = subtotal - discAmt;
+    var tax = (afterDisc + ship) * (taxPct / 100);
+    return {
+      lines: lines, subtotal: subtotal, qDisc: qDisc, discAmt: discAmt,
+      taxPct: taxPct, tax: tax, ship: ship, total: afterDisc + ship + tax
+    };
+  }
+
+  function renderLines() {
+    var m = quoteMath();
+    var body = document.getElementById('lines-body');
+
+    body.innerHTML = m.lines.map(function (l) {
+      return '' +
+        '<tr data-id="' + esc(l.item.id) + '">' +
+          '<td><div class="part">' + esc(l.item.part) + '</div>' +
+              (l.item.desc !== l.item.part ? '<div class="desc">' + esc(l.item.desc) + '</div>' : '') + '</td>' +
+          '<td class="hide-sm"><span class="tag">' + esc(genShort(l.item.gens[0])) + '</span></td>' +
+          '<td><input type="number" min="1" step="1" value="' + l.qty + '" data-f="qty" /></td>' +
+          '<td class="num">' + money(l.unit) + '</td>' +
+          '<td><input type="number" min="0" max="100" step="0.5" value="' + l.disc + '" data-f="disc" /></td>' +
+          '<td class="num ext">' + money(l.ext) + '</td>' +
+          '<td><button class="line-remove" data-f="del" title="Remove">&times;</button></td>' +
+        '</tr>';
+    }).join('');
+
+    document.getElementById('lines-count').textContent =
+      m.lines.length + ' item' + (m.lines.length === 1 ? '' : 's') + ' · ' +
+      (state.basis === 'enduser' ? 'End user pricing' : 'Dealer pricing');
+
+    var rows = '<div class="row"><span class="k">Subtotal</span><span class="v">' + money(m.subtotal) + '</span></div>';
+    if (m.qDisc > 0) {
+      rows += '<div class="row discount"><span class="k">Quote discount (' + m.qDisc + '%)</span>' +
+              '<span class="v">&minus;' + money(m.discAmt) + '</span></div>';
+    }
+    if (m.ship > 0) {
+      rows += '<div class="row"><span class="k">Shipping</span><span class="v">' + money(m.ship) + '</span></div>';
+    }
+    if (m.taxPct > 0) {
+      rows += '<div class="row"><span class="k">Tax (' + m.taxPct + '%)</span><span class="v">' + money(m.tax) + '</span></div>';
+    }
+    rows += '<div class="row grand"><span class="k">Total</span><span class="v">' + money(m.total) + '</span></div>';
+    document.getElementById('totals').innerHTML = rows;
+
+    updateTray();
+  }
+
+  document.getElementById('lines-body').addEventListener('input', function (e) {
+    var f = e.target.dataset.f;
+    if (f !== 'qty' && f !== 'disc') return;
+    var id = e.target.closest('tr').dataset.id;
+    if (!state.sel[id]) return;
+    if (f === 'qty') {
+      state.sel[id].qty = Math.max(1, parseInt(e.target.value, 10) || 1);
+    } else {
+      state.sel[id].disc = Math.min(100, Math.max(0, parseFloat(e.target.value) || 0));
+    }
+    saveSelection();
+    refreshTotalsOnly();
+  });
+
+  document.getElementById('lines-body').addEventListener('blur', function (e) {
+    if (e.target.dataset && (e.target.dataset.f === 'qty' || e.target.dataset.f === 'disc')) renderLines();
+  }, true);
+
+  document.getElementById('lines-body').addEventListener('click', function (e) {
+    if (!e.target.matches('[data-f="del"]')) return;
+    var id = e.target.closest('tr').dataset.id;
+    delete state.sel[id];
+    saveSelection();
+    if (!selectedItems().length) { closeModal(); return; }
+    renderLines();
+  });
+
+  function refreshTotalsOnly() {
+    var m = quoteMath();
+    var body = document.getElementById('lines-body');
+    m.lines.forEach(function (l) {
+      var tr = body.querySelector('tr[data-id="' + l.item.id.replace(/"/g, '\\"') + '"]');
+      if (tr) tr.querySelector('.ext').textContent = money(l.ext);
+    });
+    var rows = document.getElementById('totals');
+    if (rows) renderTotalsInto(rows, m);
+    updateTray();
+  }
+
+  function renderTotalsInto(host, m) {
+    var rows = '<div class="row"><span class="k">Subtotal</span><span class="v">' + money(m.subtotal) + '</span></div>';
+    if (m.qDisc > 0) {
+      rows += '<div class="row discount"><span class="k">Quote discount (' + m.qDisc + '%)</span>' +
+              '<span class="v">&minus;' + money(m.discAmt) + '</span></div>';
+    }
+    if (m.ship > 0) rows += '<div class="row"><span class="k">Shipping</span><span class="v">' + money(m.ship) + '</span></div>';
+    if (m.taxPct > 0) rows += '<div class="row"><span class="k">Tax (' + m.taxPct + '%)</span><span class="v">' + money(m.tax) + '</span></div>';
+    rows += '<div class="row grand"><span class="k">Total</span><span class="v">' + money(m.total) + '</span></div>';
+    host.innerHTML = rows;
+  }
+
+  ['q-discount', 'q-tax', 'q-shipping'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', refreshTotalsOnly);
+  });
+
+  document.querySelectorAll('input[name="basis"]').forEach(function (r) {
+    r.addEventListener('change', function () {
+      state.basis = r.value;
+      renderLines();
+    });
+  });
+
+  document.getElementById('q-preparer').addEventListener('change', function (e) {
+    try { localStorage.setItem(LS_PREP, e.target.value); } catch (err) {}
+  });
+
+  document.getElementById('btn-quote').addEventListener('click', openModal);
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('btn-back').addEventListener('click', closeModal);
+  modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    // Lightbox sits on top, so it takes Escape first.
+    if (lightbox.classList.contains('show')) { closeLightbox(); return; }
+    if (modal.classList.contains('show')) closeModal();
+  });
+
+  // ---------------------------------------------------------------- quote document
+  document.getElementById('btn-preview').addEventListener('click', function () {
+    var msg = document.getElementById('modal-msg');
+    var company = document.getElementById('q-company').value.trim();
+    var contact = document.getElementById('q-contact').value.trim();
+    if (!company && !contact) {
+      msg.textContent = 'Enter a customer or company name first.';
+      document.getElementById('q-company').focus();
+      return;
+    }
+    msg.textContent = '';
+
+    var win = window.open('', '_blank');
+    if (!win) {
+      msg.textContent = 'Your browser blocked the quote window. Allow pop-ups for this page and try again.';
+      return;
+    }
+    win.document.open();
+    win.document.write(buildQuoteDoc());
+    win.document.close();
+    bumpQuoteSeq();
+  });
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    var p = iso.split('-');
+    var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+    return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  }
+
+  function buildQuoteDoc() {
+    // Note: the pricing basis (dealer vs end user) is deliberately NOT printed
+    // anywhere on the quote -- it is an internal distinction. It only selects
+    // which price each line carries.
+    var m = quoteMath();
+    var company  = document.getElementById('q-company').value.trim();
+    var contact  = document.getElementById('q-contact').value.trim();
+    var email    = document.getElementById('q-email').value.trim();
+    var phone    = document.getElementById('q-phone').value.trim();
+    var number   = document.getElementById('q-number').value.trim();
+    var qdate    = document.getElementById('q-date').value;
+    var qvalid   = document.getElementById('q-valid').value;
+    var preparer = document.getElementById('q-preparer').value.trim();
+    var terms    = document.getElementById('q-terms').value.trim();
+
+    var rows = m.lines.map(function (l) {
+      var thumb = l.item.image
+        ? '<img src="' + esc(absUrl(l.item.image)) + '" alt="" />'
+        : '<div class="ph">' + esc(l.item.part) + '</div>';
+      return '' +
+        '<tr>' +
+          '<td class="thumb">' + thumb + '</td>' +
+          '<td><div class="p">' + esc(l.item.part) + '</div>' +
+              (l.item.desc !== l.item.part ? '<div class="d">' + esc(l.item.desc) + '</div>' : '') + '</td>' +
+          '<td class="c"><span class="gtag">' + esc(l.item.gens.map(genShort).join(' / ')) + '</span></td>' +
+          '<td class="c">' + l.qty + '</td>' +
+          '<td class="n">' + money(l.unit) + '</td>' +
+          '<td class="c">' + (l.disc > 0 ? l.disc + '%' : '—') + '</td>' +
+          '<td class="n b">' + money(l.ext) + '</td>' +
+        '</tr>';
+    }).join('');
+
+    var totalRows = '<tr><td>Subtotal</td><td class="n">' + money(m.subtotal) + '</td></tr>';
+    if (m.qDisc > 0) {
+      totalRows += '<tr class="disc"><td>Quote discount (' + m.qDisc + '%)</td><td class="n">&minus;' + money(m.discAmt) + '</td></tr>';
+    }
+    if (m.ship > 0) totalRows += '<tr><td>Shipping &amp; handling</td><td class="n">' + money(m.ship) + '</td></tr>';
+    if (m.taxPct > 0) totalRows += '<tr><td>Tax (' + m.taxPct + '%)</td><td class="n">' + money(m.tax) + '</td></tr>';
+
+    var units = m.lines.reduce(function (a, l) { return a + l.qty; }, 0);
+
+    return '' +
+'<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" />' +
+'<meta name="viewport" content="width=device-width, initial-scale=1.0" />' +
+'<title>Quote ' + esc(number) + ' — ' + esc(company || contact) + '</title>' +
+'<style>' +
+"@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');" +
+'*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}' +
+':root{--black:#0a0a0a;--red:#cc1111;--white:#fff;--gray-100:#f4f4f4;--gray-200:#e2e2e2;--gray-500:#888;--gray-700:#444}' +
+"body{font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--gray-100);color:var(--gray-700);line-height:1.7;font-size:15px;-webkit-print-color-adjust:exact;print-color-adjust:exact}" +
+'header{background:var(--black);padding:12px 30px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}' +
+'header img{height:28px}' +
+'.badge{background:var(--red);color:var(--white);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 11px;border-radius:3px}' +
+'.docinfo{background:var(--white);border-bottom:3px solid var(--red);padding:18px 30px 16px}' +
+'.docinfo-top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--gray-200)}' +
+'.qnum .kick{display:block;font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin-bottom:1px}' +
+'.qnum strong{font-size:1.2rem;font-weight:700;color:var(--black);letter-spacing:-.01em;line-height:1.25}' +
+'.dates{display:flex;gap:26px;flex-wrap:wrap}' +
+'.dates div{font-size:9px;color:var(--gray-500);letter-spacing:.1em;text-transform:uppercase;line-height:1.5}' +
+'.dates strong{display:block;font-size:.85rem;font-weight:600;color:var(--black);text-transform:none;letter-spacing:0;line-height:1.4}' +
+'.parties{display:grid;grid-template-columns:1fr 1fr;gap:30px;padding-top:13px}' +
+'.party h3{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin-bottom:4px}' +
+'.party .nm{font-size:.92rem;font-weight:700;color:var(--black);line-height:1.35}' +
+'.party .ln{font-size:.8rem;color:var(--gray-500);line-height:1.5}' +
+'main{max-width:960px;margin:0 auto;padding:24px 24px 48px}' +
+'.card{background:var(--white);border-radius:10px;border:1px solid var(--gray-200);box-shadow:0 2px 8px rgba(0,0,0,.05);margin-bottom:24px;overflow:hidden}' +
+'.card-head{background:var(--black);padding:11px 22px;display:flex;align-items:center;gap:12px}' +
+'.card-head h2{color:var(--white);font-size:.9rem;font-weight:600;letter-spacing:.02em;flex:1}' +
+'.card-head .sub{font-size:11px;color:#999;letter-spacing:.04em}' +
+'table.items{width:100%;border-collapse:collapse;font-size:.86rem}' +
+'table.items thead{background:var(--gray-100);display:table-header-group}' +
+'table.items th{padding:10px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-500);border-bottom:2px solid var(--gray-200);white-space:nowrap}' +
+'table.items td{padding:11px 12px;border-bottom:1px solid var(--gray-200);vertical-align:middle}' +
+'table.items tr:last-child td{border-bottom:none}' +
+'table.items tr{page-break-inside:avoid}' +
+'td.thumb{width:56px;padding:8px 6px 8px 12px}' +
+'td.thumb img{width:46px;height:46px;object-fit:contain;border:1px solid var(--gray-200);border-radius:5px;background:var(--white);display:block}' +
+'td.thumb .ph{width:46px;height:46px;border-radius:5px;background:linear-gradient(135deg,#1a1a1a 0%,#2a0808 100%);color:rgba(255,255,255,.85);font-size:7px;font-weight:700;letter-spacing:.02em;display:flex;align-items:center;justify-content:center;text-align:center;padding:3px;line-height:1.25;overflow:hidden;word-break:break-word}' +
+'table.items .p{font-weight:700;color:var(--black);font-size:.83rem}' +
+'table.items .d{font-size:.76rem;color:var(--gray-500);line-height:1.45}' +
+'table.items .n{text-align:right;white-space:nowrap}' +
+'table.items .c{text-align:center;white-space:nowrap}' +
+'table.items .b{font-weight:700;color:var(--black)}' +
+'.gtag{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:3px;background:var(--gray-100);color:var(--gray-500);border:1px solid var(--gray-200)}' +
+'.totals-wrap{display:flex;justify-content:flex-end;padding:20px 26px 24px;page-break-inside:avoid}' +
+'table.totals{width:330px;border-collapse:collapse;font-size:.88rem}' +
+'table.totals td{padding:8px 14px;border-bottom:1px solid var(--gray-200)}' +
+'table.totals td:first-child{color:var(--gray-500)}' +
+'table.totals td.n{text-align:right;font-weight:600;color:var(--black);white-space:nowrap}' +
+'table.totals tr.disc td{color:var(--red)}' +
+'table.totals tr.disc td.n{color:var(--red)}' +
+'table.totals tr.grand td{background:var(--black);border-bottom:none;border-top:3px solid var(--red);padding:13px 14px}' +
+'table.totals tr.grand td:first-child{color:#999;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}' +
+'table.totals tr.grand td.n{color:var(--white);font-size:1.3rem;font-weight:700}' +
+'.callout{background:#e8f0fe;border-left:4px solid #1a56a0;border-radius:0 6px 6px 0;padding:14px 18px;margin:0 26px 24px;font-size:.85rem;color:#1a3060;page-break-inside:avoid}' +
+'.callout strong{display:block;color:#0f1f40;margin-bottom:3px}' +
+'footer{background:var(--black);color:#555;text-align:center;padding:22px;font-size:.78rem}' +
+'footer span{color:var(--red)}' +
+'.printbar{position:fixed;bottom:22px;right:22px;z-index:10;display:flex;gap:8px}' +
+".printbar button{font-family:'Inter',sans-serif;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;background:var(--red);color:#fff;border:none;padding:11px 20px;border-radius:6px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3)}" +
+'.printbar button:hover{background:#a50d0d}' +
+'@media print{body{background:#fff;font-size:11.5px}.printbar{display:none}' +
+'header{padding:9px 0}.docinfo{padding:13px 0 11px;border-bottom-width:2px}' +
+'.docinfo-top{padding-bottom:10px}.parties{padding-top:10px}' +
+'main{max-width:100%;padding:14px 0 0}.card{box-shadow:none;border:1px solid #ccc;margin-bottom:12px}' +
+'.card-head{padding:8px 14px}footer{padding:10px;font-size:.7rem}@page{margin:11mm}}' +
+'@media (max-width:640px){header,.docinfo{padding-left:18px;padding-right:18px}.parties{grid-template-columns:1fr;gap:18px}main{padding:18px 14px 40px}.totals-wrap{padding:16px}table.totals{width:100%}}' +
+'</style></head><body>' +
+
+'<div class="printbar"><button onclick="window.print()">Print / Save PDF</button></div>' +
+
+'<header><img src="' + esc(absUrl('Impact Logo.png')) + '" alt="Impact LED Signs" />' +
+'<span class="badge">Quotation</span></header>' +
+
+'<div class="docinfo">' +
+  '<div class="docinfo-top">' +
+    '<div class="qnum"><span class="kick">Quote Number</span><strong>' + esc(number) + '</strong></div>' +
+    '<div class="dates">' +
+      '<div><strong>' + esc(fmtDate(qdate)) + '</strong>Quote Date</div>' +
+      '<div><strong>' + esc(fmtDate(qvalid)) + '</strong>Valid Until</div>' +
+      '<div><strong>' + m.lines.length + ' items / ' + units + ' units</strong>Quantity</div>' +
+    '</div>' +
+  '</div>' +
+  '<div class="parties">' +
+    '<div class="party"><h3>Prepared For</h3>' +
+      '<div class="nm">' + esc(company || contact || '—') + '</div>' +
+      (company && contact ? '<div class="ln">' + esc(contact) + '</div>' : '') +
+      (email ? '<div class="ln">' + esc(email) + '</div>' : '') +
+      (phone ? '<div class="ln">' + esc(phone) + '</div>' : '') +
+    '</div>' +
+    '<div class="party"><h3>Prepared By</h3>' +
+      '<div class="nm">Impact LED Signs</div>' +
+      (preparer ? '<div class="ln">' + esc(preparer) + '</div>' : '') +
+      '<div class="ln">access.impactledsigns.com</div>' +
+    '</div>' +
+  '</div>' +
+'</div>' +
+
+'<main>' +
+  '<div class="card">' +
+    '<div class="card-head"><h2>Quoted Items</h2></div>' +
+    '<table class="items"><thead><tr>' +
+      '<th></th><th>Part / Description</th><th class="c">Gen</th><th class="c">Qty</th>' +
+      '<th class="n">Unit Price</th><th class="c">Disc</th><th class="n">Extended</th>' +
+    '</tr></thead><tbody>' + rows + '</tbody></table>' +
+    '<div class="totals-wrap"><table class="totals"><tbody>' + totalRows +
+      '<tr class="grand"><td>Total</td><td class="n">' + money(m.total) + '</td></tr>' +
+    '</tbody></table></div>' +
+    (terms ? '<div class="callout"><strong>Terms &amp; Notes</strong>' + esc(terms) + '</div>' : '') +
+  '</div>' +
+'</main>' +
+
+'<footer><p>Impact LED Signs &nbsp;&middot;&nbsp; <span>Quotation ' + esc(number) + '</span>' +
+' &nbsp;&middot;&nbsp; Valid until ' + esc(fmtDate(qvalid)) + '</p></footer>' +
+
+'</body></html>';
+  }
+
+  // ---------------------------------------------------------------- boot
+  document.getElementById('meta-skus').textContent = ITEMS.length;
+  document.getElementById('meta-gens').textContent = DATA.generations.length;
+  render();
+})();
+</script>
+
+</body>
+</html>
