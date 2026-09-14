@@ -481,6 +481,26 @@ main {
 }
 .lines input::-webkit-outer-spin-button, .lines input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .lines input:focus { outline: none; border-color: var(--red); }
+
+/* ── DISCOUNT MODE TOGGLE (% vs $) ── */
+.disc-cell { display: flex; align-items: stretch; gap: 0; }
+.disc-cell input {
+  width: 52px; border-radius: 5px 0 0 5px; border-right: none; text-align: right; padding-right: 5px;
+}
+.mode-btn {
+  font-family: inherit; font-size: .78rem; font-weight: 700;
+  width: 25px; flex-shrink: 0;
+  border: 1px solid var(--gray-200); border-radius: 0 5px 5px 0;
+  background: var(--gray-100); color: var(--gray-500);
+  cursor: pointer; padding: 0; line-height: 1;
+  transition: background .15s, color .15s;
+}
+.mode-btn:hover { background: var(--gray-200); color: var(--black); }
+.mode-btn.amt { background: var(--red); border-color: var(--red); color: var(--white); }
+
+/* same control, inside the left-hand form */
+.field .disc-cell input { width: 100%; font-size: .85rem; padding: 8px 10px; text-align: left; }
+.field .disc-cell .mode-btn { width: 34px; font-size: .88rem; }
 .lines .ext { font-weight: 700; color: var(--black); }
 .line-remove {
   background: none; border: none; color: var(--gray-300); cursor: pointer;
@@ -556,7 +576,7 @@ footer span { color: var(--red); }
   <div class="doc-meta">
     <div class="doc-meta-item"><strong id="meta-skus">—</strong>Items</div>
     <div class="doc-meta-item"><strong id="meta-gens">—</strong>Generations</div>
-    <div class="doc-meta-item"><strong>September 10, 2026</strong>Price List Revised</div>
+    <div class="doc-meta-item"><strong>September 14, 2026</strong>Price List Revised</div>
     <div class="doc-meta-item"><strong>Internal</strong>Technician Use</div>
   </div>
 </div>
@@ -646,7 +666,12 @@ footer span { color: var(--red); }
         <div class="field-group">
           <h3>Adjustments</h3>
           <div class="field-2">
-            <div class="field"><label>Quote Discount %</label><input id="q-discount" type="number" min="0" max="100" step="0.1" value="0" /></div>
+            <div class="field"><label>Quote Discount</label>
+              <div class="disc-cell">
+                <input id="q-discount" type="number" min="0" step="0.1" value="0" />
+                <button type="button" class="mode-btn" id="q-discount-mode" title="Switch between percent and dollars">%</button>
+              </div>
+            </div>
             <div class="field"><label>Tax Rate %</label><input id="q-tax" type="number" min="0" step="0.001" value="0" /></div>
           </div>
           <div class="field"><label>Shipping ($)</label><input id="q-shipping" type="number" min="0" step="0.01" value="0" /></div>
@@ -670,7 +695,7 @@ footer span { color: var(--red); }
               <th class="hide-sm">Gen</th>
               <th style="width:78px">Qty</th>
               <th class="num">Unit</th>
-              <th style="width:78px">Disc %</th>
+              <th style="width:92px">Discount</th>
               <th class="num">Extended</th>
               <th style="width:28px"></th>
             </tr>
@@ -705,10 +730,10 @@ footer span { color: var(--red); }
 
 <footer>
   <p>Impact LED Signs &nbsp;·&nbsp; <span>Internal Use Only — Technician Tool</span>
-     &nbsp;·&nbsp; Price list revised September 10, 2026</p>
+     &nbsp;·&nbsp; Price list revised September 14, 2026</p>
 </footer>
 
-<script id="item-data" type="application/json">{"generated": "2026-09-10", "generations": ["G1", "G2", "G3", "G4", "G5", "Video Wall"], "categories": ["Modules", "Receivers", "Controllers", "Hubs", "Power", "Cabling", "Cellular & WiFi", "Sensors", "Tools & Misc"], "items": [{"id": "1123-c3pro-controller-1123-controller", "part": "1123 (C3Pro) Controller", "desc": "1123 Controller", "gens": ["G1", "G2", "G3", "G4", "G5"], "cat": "Controllers", "dealer": 540.0, "enduser": 772.2, "image": "images/CONTROLLER - 1123.png"}, {"id": "4g-cradlepoint-ibr200-cellular-modem-modem-only", "part": "4G Cradlepoint IBR200", "desc": "Cellular Modem, Modem Only", "gens": ["G1", "G2", "G3", "G4"], "cat": "Cellular & WiFi", "dealer": 500.0, "enduser": 715.0, "image": "images/4G - IBR200.png"}, {"id": "4g-cradlepoint-ibr200-cellular-modem-1-yr-service", "part": "4G Cradlepoint IBR200", "desc": "Cellular Modem, 1 Yr Service", "gens": ["G1", "G2"], "cat": "Cellular & WiFi", "dealer": 1043.88, "enduser": 1310.15, "image": "images/4G - IBR200.png"}, {"id": "4g-cradlepoint-ibr200-cellular-modem-1-yr-service-2", "part": "4G Cradlepoint IBR200", "desc": "Cellular Modem, 1 Yr Service", "gens": ["G3", "G4"], "cat": "Cellular & WiFi", "dealer": 750.0, "enduser": 1072.5, "image": "images/4G - IBR200.png"}, {"id": "4g-cradlepoint-ibr200-cellular-modem-5-yr-service", "part": "4G Cradlepoint IBR200", "desc": "Cellular Modem, 5 Yr Service", "gens": ["G1", "G2"], "cat": "Cellular & WiFi", "dealer": 1293.88, "enduser": 2025.15, "image": "images/4G - IBR200.png"}, {"id": "4g-cradlepoint-ibr200-cellular-modem-5-yr-service-2", "part": "4G Cradlepoint IBR200", "desc": "Cellular Modem, 5 Yr Service", "gens": ["G3", "G4"], "cat": "Cellular & WiFi", "dealer": 1250.0, "enduser": 1787.5, "image": "images/4G - IBR200.png"}, {"id": "4g-cradlepoint-ibr200-cellular-modem-lifetime-service", "part": "4G Cradlepoint IBR200", "desc": "Cellular Modem, Lifetime Service", "gens": ["G1", "G2"], "cat": "Cellular & WiFi", "dealer": 2043.88, "enduser": 3097.65, "image": "images/4G - IBR200.png"}, {"id": "4g-cradlepoint-ibr200-cellular-modem-lifetime-service-2", "part": "4G Cradlepoint IBR200", "desc": "Cellular Modem, Lifetime Service", "gens": ["G3", "G4"], "cat": "Cellular & WiFi", "dealer": 2000.0, "enduser": 2860.0, "image": "images/4G - IBR200.png"}, {"id": "4g-antennas-high-gain-4g-modem-antennas", "part": "4G-Antennas", "desc": "High Gain 4G Modem antennas", "gens": ["G1", "G2", "G3", "G4"], "cat": "Cellular & WiFi", "dealer": 49.75, "enduser": 71.14, "image": null}, {"id": "cloudps-12v-12v-power-source-for-cloud", "part": "CLOUDPS-12V", "desc": "12v Power Source for cloud", "gens": ["G1", "G2", "G3"], "cat": "Power", "dealer": 112.5, "enduser": 160.88, "image": null}, {"id": "ethernet-msl-primary-secondary-cable-long", "part": "Ethernet - MSL", "desc": "Primary Secondary Cable (LONG)", "gens": ["G1", "G2", "G3", "G4", "G5"], "cat": "Cabling", "dealer": 22.5, "enduser": 32.18, "image": null}, {"id": "ethernet-mss-primary-secondary-cable", "part": "Ethernet - MSS", "desc": "Primary Secondary Cable", "gens": ["G1", "G2", "G3", "G4", "G5"], "cat": "Cabling", "dealer": 15.0, "enduser": 21.45, "image": null}, {"id": "ethernet-swl-single-sided-weather-proof-cable-long", "part": "Ethernet - SWL", "desc": "Single Sided Weather Proof Cable (LONG)", "gens": ["G1", "G2", "G3", "G4", "G5"], "cat": "Cabling", "dealer": 37.5, "enduser": 53.63, "image": null}, {"id": "ethernet-sws-sinle-sided-weather-proof-cable-short", "part": "Ethernet - SWS", "desc": "Sinle Sided Weather Proof Cable (SHORT)", "gens": ["G1", "G2", "G3", "G4", "G5"], "cat": "Cabling", "dealer": 25.0, "enduser": 35.75, "image": null}, {"id": "ethernet-surge-protector-ethernet-surge-protector", "part": "ETHERNET-SURGE-PROTECTOR", "desc": "Ethernet Surge Protector", "gens": ["G1", "G2", "G3", "G4", "G5"], "cat": "Cabling", "dealer": 125.0, "enduser": 150.0, "image": null}, {"id": "hub-40a-40a-hub-card", "part": "HUB-40A", "desc": "40A hub card", "gens": ["G1"], "cat": "Hubs", "dealer": 42.0, "enduser": 60.06, "image": "images/HUB - 40A.png"}, {"id": "hub-p16-20x20-p16-20x20-hub-card", "part": "HUB-P16-20x20", "desc": "P16 20x20 hub card", "gens": ["G1"], "cat": "Hubs", "dealer": 42.0, "enduser": 60.06, "image": null}, {"id": "hub-p16-320-p16-320-hub-card", "part": "HUB-P16-320", "desc": "P16 320 hub card", "gens": ["G1"], "cat": "Hubs", "dealer": 42.0, "enduser": 60.06, "image": "images/HUB - P16320.png"}, {"id": "hub-p16-336-p16-336-hub-card", "part": "HUB-P16-336", "desc": "P16 336 Hub Card", "gens": ["G1"], "cat": "Hubs", "dealer": 42.0, "enduser": 60.06, "image": null}, {"id": "l-d-1-10-r-32x32-g1-10mm-rgb", "part": "L-D-1-10-R-32x32", "desc": "G1 10mm RGB", "gens": ["G1"], "cat": "Modules", "dealer": 340.0, "enduser": 486.2, "image": null}, {"id": "l-d-1-16-r-20x20-g1-16mm-rgb", "part": "L-D-1-16-R-20x20", "desc": "G1 16mm RGB", "gens": ["G1"], "cat": "Modules", "dealer": 270.0, "enduser": 386.1, "image": null}, {"id": "l-d-1-16-v-20x20-g1-16mm-rrgb", "part": "L-D-1-16-V-20x20", "desc": "G1 16mm RRGB", "gens": ["G1"], "cat": "Modules", "dealer": 345.0, "enduser": 493.35, "image": null}, {"id": "l-d-1-20-r-16x16-g1-20mm-rgb", "part": "L-D-1-20-R-16x16", "desc": "G1 20mm RGB", "gens": ["G1"], "cat": "Modules", "dealer": 200.0, "enduser": 286.0, "image": null}, {"id": "l-d-1-20-v-16x16-g1-20mm-rrgb", "part": "L-D-1-20-V-16x16", "desc": "G1 20mm RRGB", "gens": ["G1"], "cat": "Modules", "dealer": 250.0, "enduser": 357.5, "image": null}, {"id": "lrs-350-5-5v-tile-power-source-g1-and-g2", "part": "LRS-350-5", "desc": "5V Tile Power Source - G1 and G2", "gens": ["G1", "G2"], "cat": "Power", "dealer": 200.0, "enduser": 286.0, "image": "images/POWER - LRS-350-5.png"}, {"id": "mod-tool-g1-g1-wrench-2mm-square", "part": "MOD-TOOL-G1", "desc": "G1 Wrench - 2mm Square", "gens": ["G1"], "cat": "Tools & Misc", "dealer": 25.0, "enduser": 35.75, "image": null}, {"id": "poe-box-poe-injector", "part": "POE-BOX", "desc": "POE Injector", "gens": ["G1", "G2", "G3"], "cat": "Cabling", "dealer": 25.0, "enduser": 35.75, "image": null}, {"id": "rec-5a75e-i5a-75e-receiver", "part": "REC-5A75E", "desc": "i5A-75E Receiver", "gens": ["G1", "G2"], "cat": "Receivers", "dealer": 102.0, "enduser": 145.86, "image": "images/REC - I5A75E.png"}, {"id": "rec-i5a-i5a-receiver", "part": "REC-i5A", "desc": "i5A Receiver", "gens": ["G1"], "cat": "Receivers", "dealer": 102.0, "enduser": 145.86, "image": "images/REC - I5A.png"}, {"id": "term-block-g1-terminal-block-for-g1-sign", "part": "TERM-BLOCK-G1", "desc": "Terminal Block for G1 Sign", "gens": ["G1"], "cat": "Tools & Misc", "dealer": 50.0, "enduser": 71.5, "image": null}, {"id": "usba-usbb-usb-a-to-usb-b-cord", "part": "USBA-USBB", "desc": "USB-A to USB-B cord", "gens": ["G1", "G2", "G3"], "cat": "Cabling", "dealer": 7.45, "enduser": 10.65, "image": null}, {"id": "wifi-bracket-wifi-bracket", "part": "WIFI-BRACKET", "desc": "Wifi Bracket", "gens": ["G1", "G2", "G3"], "cat": "Cellular & WiFi", "dealer": 12.5, "enduser": 17.88, "image": null}, {"id": "wifi-ubiquity-radio-wifi-radio-pair", "part": "WIFI-Ubiquity Radio", "desc": "Wifi Radio (Pair)", "gens": ["G1", "G2", "G3", "G4", "G5"], "cat": "Cellular & WiFi", "dealer": 300.0, "enduser": 500.0, "image": "images/WIFI - NANOSTATIONM2.png"}, {"id": "cable-blue-3-3-blue-ethernet-cord", "part": "CABLE-BLUE-3", "desc": "3' Blue ethernet cord", "gens": ["G2"], "cat": "Cabling", "dealer": 4.7, "enduser": 6.72, "image": null}, {"id": "guide-install-g2-g2-install-guide", "part": "Guide - Install G2", "desc": "G2 Install Guide", "gens": ["G2"], "cat": "Tools & Misc", "dealer": 5.0, "enduser": 7.15, "image": null}, {"id": "guide-ms-guide-master-slave-connection-guide", "part": "Guide - MS Guide", "desc": "Master Slave Connection Guide", "gens": ["G2"], "cat": "Tools & Misc", "dealer": 5.0, "enduser": 7.15, "image": null}, {"id": "guide-wifi-wfi-kit-install-guide", "part": "Guide - Wifi", "desc": "Wfi kit install guide", "gens": ["G2", "G3", "G4"], "cat": "Tools & Misc", "dealer": 5.0, "enduser": 7.15, "image": null}, {"id": "lightsensor-light-sensor", "part": "LIGHTSENSOR", "desc": "Light Sensor", "gens": ["G2", "G3", "G5"], "cat": "Sensors", "dealer": 315.0, "enduser": 450.45, "image": null}, {"id": "m-g2-10-g2-10mm-rgb", "part": "M-G2-10", "desc": "G2 10mm RGB", "gens": ["G2"], "cat": "Modules", "dealer": 257.0, "enduser": 367.51, "image": null}, {"id": "m-g2-16-g2-16mm-rgb", "part": "M-G2-16", "desc": "G2 16mm RGB", "gens": ["G2"], "cat": "Modules", "dealer": 200.0, "enduser": 286.0, "image": null}, {"id": "m-g2-20-g2-20mm-rgb", "part": "M-G2-20", "desc": "G2 20mm RGB", "gens": ["G2"], "cat": "Modules", "dealer": 172.5, "enduser": 246.68, "image": null}, {"id": "m-g2-6-g2-6mm-rgb", "part": "M-G2-6", "desc": "G2 6mm RGB", "gens": ["G2"], "cat": "Modules", "dealer": 300.0, "enduser": 429.0, "image": null}, {"id": "mod-tool-g2-3mm-hex-wrench", "part": "MOD-TOOL-G2", "desc": "3mm Hex Wrench", "gens": ["G2"], "cat": "Tools & Misc", "dealer": 25.0, "enduser": 35.75, "image": null}, {"id": "mod-tool-g2-2-5-2-5-mm-hex-wrench", "part": "MOD-TOOL-G2-2.5", "desc": "2.5 mm Hex Wrench", "gens": ["G2"], "cat": "Tools & Misc", "dealer": 25.0, "enduser": 35.75, "image": null}, {"id": "usb-mencom-waterproof-usb-built-into-mencom-box", "part": "USB-MENCOM", "desc": "Waterproof USB built into Mencom box", "gens": ["G2", "G3"], "cat": "Cabling", "dealer": 307.76, "enduser": 440.09, "image": null}, {"id": "m-g3-10-g3-10mmrgb", "part": "M-G3-10", "desc": "G3 10mmRGB", "gens": ["G3"], "cat": "Modules", "dealer": 366.5, "enduser": 524.1, "image": null}, {"id": "m-g3-15-g3-15mmrgb", "part": "M-G3-15", "desc": "G3 15mmRGB", "gens": ["G3"], "cat": "Modules", "dealer": 269.5, "enduser": 385.39, "image": null}, {"id": "m-g3-20-g3-20mmrgb", "part": "M-G3-20", "desc": "G3 20mmRGB", "gens": ["G3"], "cat": "Modules", "dealer": 197.5, "enduser": 282.43, "image": null}, {"id": "m-g3-6-g3-6mmrgb", "part": "M-G3-6", "desc": "G3 6mmRGB", "gens": ["G3"], "cat": "Modules", "dealer": 395.0, "enduser": 564.85, "image": null}, {"id": "power-supply-great-wall-3-8-v", "part": "Power Supply", "desc": "Great Wall 3.8 V", "gens": ["G3"], "cat": "Power", "dealer": 140.0, "enduser": 200.2, "image": null}, {"id": "power-breaker-g3-g3-internal-power-breaker", "part": "POWER-BREAKER-G3", "desc": "G3 Internal Power Breaker", "gens": ["G3"], "cat": "Power", "dealer": 112.5, "enduser": 135.0, "image": null}, {"id": "power-g3-v2-mean-well-3-8v", "part": "POWER-G3-V2", "desc": "Mean Well 3.8V", "gens": ["G3"], "cat": "Power", "dealer": 105.0, "enduser": 126.0, "image": null}, {"id": "rec-907-g3-cabinet-receive-card", "part": "REC-907", "desc": "G3 Cabinet Receive Card", "gens": ["G3"], "cat": "Receivers", "dealer": 102.0, "enduser": 145.86, "image": "images/REC - i5-907.png"}, {"id": "rec-i5-g3-cabinet-receive-card", "part": "REC-i5+", "desc": "G3 Cabinet Receive Card", "gens": ["G3"], "cat": "Receivers", "dealer": 102.0, "enduser": 145.86, "image": "images/REC - i5+.png"}, {"id": "surge-protector-g3-g3-internal-surge-protector", "part": "SURGE-PROTECTOR-G3", "desc": "G3 Internal Surge Protector", "gens": ["G3"], "cat": "Power", "dealer": 35.79, "enduser": 42.95, "image": null}, {"id": "4g-digiwr11xt-4g-modem-digi-wr11-xt", "part": "4G-DIGIWR11XT", "desc": "4G Modem, Digi WR11 XT", "gens": ["G4"], "cat": "Cellular & WiFi", "dealer": 800.0, "enduser": 1144.0, "image": "images/4G - DIGI.png"}, {"id": "bag-parts-parts-bag-for-shipping", "part": "BAG-PARTS", "desc": "Parts bag for shipping", "gens": ["G4"], "cat": "Tools & Misc", "dealer": 5.0, "enduser": 7.15, "image": null}, {"id": "cable-g4-module-cable-g4-module", "part": "Cable-G4-Module", "desc": "Cable-G4-Module", "gens": ["G4"], "cat": "Cabling", "dealer": 40.0, "enduser": 50.0, "image": null}, {"id": "cb-g4-communication-v4-g4-communication-box", "part": "CB-G4-COMMUNICATION-V4", "desc": "G4 Communication Box", "gens": ["G4"], "cat": "Controllers", "dealer": 100.0, "enduser": 120.0, "image": null}, {"id": "cb-g4-controller-v3-g4-control-box", "part": "CB-G4-CONTROLLER-V3", "desc": "G4 Control Box", "gens": ["G4"], "cat": "Controllers", "dealer": 125.0, "enduser": 150.0, "image": null}, {"id": "lightsensor-light-sensor-for-psd-100-and-msd-300", "part": "LIGHTSENSOR", "desc": "Light Sensor for PSD 100 and MSD 300", "gens": ["G4"], "cat": "Sensors", "dealer": 315.0, "enduser": 450.45, "image": null}, {"id": "m-g4-15-g4-15mm-rgb", "part": "M-G4-15", "desc": "G4 15mm RGB", "gens": ["G4"], "cat": "Modules", "dealer": 190.0, "enduser": 271.7, "image": null}, {"id": "m-g4-4-g4-4mm-rgb", "part": "M-G4-4", "desc": "G4 4mm RGB", "gens": ["G4"], "cat": "Modules", "dealer": 565.0, "enduser": 807.95, "image": null}, {"id": "m-g4-6-g4-6mm-rgb", "part": "M-G4-6", "desc": "G4 6mm RGB", "gens": ["G4"], "cat": "Modules", "dealer": 455.0, "enduser": 650.65, "image": null}, {"id": "m-g4-9-g4-9mm-rgb", "part": "M-G4-9", "desc": "G4 9mm RGB", "gens": ["G4"], "cat": "Modules", "dealer": 305.0, "enduser": 436.15, "image": null}, {"id": "pb-g4-5l-power-box-5-port-long", "part": "PB-G4-5L", "desc": "Power Box - 5 port long", "gens": ["G4"], "cat": "Power", "dealer": 338.0, "enduser": 405.0, "image": null}, {"id": "pb-g4-5s-power-box-5-port-short", "part": "PB-G4-5S", "desc": "Power Box- 5 port short", "gens": ["G4"], "cat": "Power", "dealer": 355.0, "enduser": 426.0, "image": null}, {"id": "pb-g4-8-power-box-8-port", "part": "PB-G4-8", "desc": "Power Box- 8 port", "gens": ["G4"], "cat": "Power", "dealer": 375.0, "enduser": 450.0, "image": null}, {"id": "4g-s400-cradlepoint-s400-modem", "part": "4G-S400", "desc": "Cradlepoint S400 Modem", "gens": ["G5"], "cat": "Cellular & WiFi", "dealer": 793.88, "enduser": 952.65, "image": "images/4G - S400.png"}, {"id": "4g-s400-cellular-modem-1-yr-service", "part": "4G-S400", "desc": "Cellular Modem, 1 Yr Service", "gens": ["G5"], "cat": "Cellular & WiFi", "dealer": 1043.88, "enduser": 1310.15, "image": "images/4G - S400.png"}, {"id": "4g-s400-cellular-modem-5-yr-service", "part": "4G-S400", "desc": "Cellular Modem, 5 Yr Service", "gens": ["G5"], "cat": "Cellular & WiFi", "dealer": 1293.88, "enduser": 2025.15, "image": "images/4G - S400.png"}, {"id": "4g-s400-cellular-modem-lifetime-service", "part": "4G-S400", "desc": "Cellular Modem, Lifetime Service", "gens": ["G5"], "cat": "Cellular & WiFi", "dealer": 2043.88, "enduser": 3097.65, "image": "images/4G - S400.png"}, {"id": "cb-g5-com-g5-combox", "part": "CB-G5-COM", "desc": "G5 Combox", "gens": ["G5"], "cat": "Controllers", "dealer": 112.5, "enduser": 135.0, "image": null}, {"id": "cb-g5-ctrl-g5-control-box", "part": "CB-G5-CTRL", "desc": "G5 Control Box", "gens": ["G5"], "cat": "Controllers", "dealer": 262.5, "enduser": 315.0, "image": null}, {"id": "cbr-g5-cbr-g5-26011901-54", "part": "CBR-G5", "desc": "CBR-G5-26011901-54", "gens": ["G5"], "cat": "Controllers", "dealer": null, "enduser": null, "image": null}, {"id": "hub-g5-2-hub-g5-2-26011901-09", "part": "HUB-G5-2", "desc": "HUB-G5-2-26011901-09", "gens": ["G5"], "cat": "Hubs", "dealer": 33.75, "enduser": 40.5, "image": null}, {"id": "hub-g5-3-hub-g5-3-26011901-10", "part": "HUB-G5-3", "desc": "HUB-G5-3-26011901-10", "gens": ["G5"], "cat": "Hubs", "dealer": 53.63, "enduser": 64.35, "image": null}, {"id": "hub-g5-4-hub-g5-4-26011901-11", "part": "HUB-G5-4", "desc": "HUB-G5-4-26011901-11", "gens": ["G5"], "cat": "Hubs", "dealer": 72.15, "enduser": 86.58, "image": null}, {"id": "hub-g5-indv-single-g5-hub-used-in-3-high-cabinets", "part": "Hub-G5-Indv", "desc": "Single G5 Hub used in 3-high cabinets.", "gens": ["G5"], "cat": "Hubs", "dealer": null, "enduser": null, "image": null}, {"id": "m-g5-1-56-m-g5-1-56-26013001-04", "part": "M-G5-1.56", "desc": "M-G5-1.56-26013001 -04", "gens": ["G5"], "cat": "Modules", "dealer": 83.25, "enduser": 99.9, "image": null}, {"id": "m-g5-15-g5-15mm-rgb", "part": "M-G5-15", "desc": "G5 15mm RGB", "gens": ["G5"], "cat": "Modules", "dealer": 210.0, "enduser": 300.3, "image": null}, {"id": "m-g5-4-g5-4mm-rgb", "part": "M-G5-4", "desc": "G5 4mm RGB", "gens": ["G5"], "cat": "Modules", "dealer": 600.0, "enduser": 858.0, "image": null}, {"id": "m-g5-6-g5-6mm-rgb", "part": "M-G5-6", "desc": "G5 6mm RGB", "gens": ["G5"], "cat": "Modules", "dealer": 375.0, "enduser": 536.25, "image": null}, {"id": "m-g5-9-g5-9mm-rgb", "part": "M-G5-9", "desc": "G5 9mm RGB", "gens": ["G5"], "cat": "Modules", "dealer": 300.0, "enduser": 429.0, "image": null}, {"id": "pb-g5-2-pb-g5-2-26011901-05", "part": "PB-G5-2", "desc": "PB-G5-2-26011901-05", "gens": ["G5"], "cat": "Power", "dealer": 316.25, "enduser": 379.5, "image": null}, {"id": "pb-g5-3-d-3-wide-power-bar-with-two-power-supplies", "part": "PB-G5-3-D", "desc": "3 Wide power bar with two power supplies", "gens": ["G5"], "cat": "Power", "dealer": 512.5, "enduser": 615.0, "image": null}, {"id": "pb-g5-3-s-3-wide-power-bar-with-one-power-supply", "part": "PB-G5-3-S", "desc": "3 Wide power bar with one power supply", "gens": ["G5"], "cat": "Power", "dealer": 383.0, "enduser": 459.6, "image": null}, {"id": "pb-g5-4-pb-g5-4-26011901-07", "part": "PB-G5-4", "desc": "PB-G5-4-26011901-07", "gens": ["G5"], "cat": "Power", "dealer": 570.0, "enduser": 684.0, "image": null}, {"id": "pwr-g5-mcp200-vcab-pwr-g5-mcp200-vcab", "part": "PWR-G5-MCP200-VCAB", "desc": "PWR-G5-MCP200-VCAB", "gens": ["G5", "Video Wall"], "cat": "Power", "dealer": 37.5, "enduser": 45.0, "image": null}, {"id": "m-g4-1-5-video-wall-1-5mm-rgb", "part": "M-G4-1.5", "desc": "Video Wall 1.5mm RGB", "gens": ["Video Wall"], "cat": "Modules", "dealer": 300.0, "enduser": 429.0, "image": null}, {"id": "m-g4-1-8-video-wall-1-8mm-rgb", "part": "M-G4-1.8", "desc": "Video Wall 1.8mm RGB", "gens": ["Video Wall"], "cat": "Modules", "dealer": 312.5, "enduser": 446.88, "image": null}, {"id": "m-g4-1-91-video-wall-1-91mm-rgb", "part": "M-G4-1.91", "desc": "Video Wall 1.91mm RGB", "gens": ["Video Wall"], "cat": "Modules", "dealer": 325.0, "enduser": 464.75, "image": null}, {"id": "m-g4-2-video-wall-2mm-rgb", "part": "M-G4-2", "desc": "Video Wall 2mm RGB", "gens": ["Video Wall"], "cat": "Modules", "dealer": 250.0, "enduser": 357.5, "image": null}, {"id": "m-g4-2-5-video-wall-2-5mm-rgb", "part": "M-G4-2 .5", "desc": "Video Wall 2.5mm RGB", "gens": ["Video Wall"], "cat": "Modules", "dealer": 175.0, "enduser": 250.25, "image": null}, {"id": "m-g4-2-6-video-wall-2-6mm-rgb", "part": "M-G4-2.6", "desc": "Video Wall 2.6mm RGB", "gens": ["Video Wall"], "cat": "Modules", "dealer": 175.0, "enduser": 250.25, "image": null}, {"id": "m-g4-3-91-video-wall-3-91mm-rgb", "part": "M-G4-3.91", "desc": "Video Wall 3.91mm RGB", "gens": ["Video Wall"], "cat": "Modules", "dealer": 120.0, "enduser": 171.6, "image": null}, {"id": "magnet-tool-module-removal-tool", "part": "MAGNET-TOOL", "desc": "Module Removal Tool", "gens": ["Video Wall"], "cat": "Tools & Misc", "dealer": null, "enduser": null, "image": null}, {"id": "controller-x100-pro-7u-controller-x100-pro-7u", "part": "CONTROLLER-X100-PRO-7U", "desc": "CONTROLLER-X100-PRO-7U", "gens": ["Video Wall"], "cat": "Controllers", "dealer": null, "enduser": null, "image": null}, {"id": "controller-a200-controller-a200", "part": "CONTROLLER-A200", "desc": "CONTROLLER-A200", "gens": ["Video Wall"], "cat": "Controllers", "dealer": 1340.0, "enduser": 1926.25, "image": null}, {"id": "rec-k5-g4-rec-k5-g4", "part": "REC-K5+-G4", "desc": "REC-K5+-G4", "gens": ["Video Wall"], "cat": "Receivers", "dealer": null, "enduser": null, "image": null}, {"id": "hub-a3-g4-vcab-hub-a3-g4-vcab", "part": "HUB-A3-G4-VCAB", "desc": "HUB-A3-G4-VCAB", "gens": ["Video Wall"], "cat": "Hubs", "dealer": 37.5, "enduser": 45.0, "image": null}, {"id": "hub-b1-g4-vcab-hub-b1-g4-vcab", "part": "HUB-B1-G4-VCAB", "desc": "HUB-B1-G4-VCAB", "gens": ["Video Wall"], "cat": "Hubs", "dealer": 58.33, "enduser": 69.99, "image": null}, {"id": "power-dsp-300k-vcab-power-dsp-300k-vcab", "part": "POWER-DSP-300K-VCAB", "desc": "POWER-DSP-300K-VCAB", "gens": ["Video Wall"], "cat": "Power", "dealer": 62.5, "enduser": 75.0, "image": null}, {"id": "power-dsp-200k-vcab-power-dsp-200k-vcab", "part": "POWER-DSP-200K-VCAB", "desc": "POWER-DSP-200K-VCAB", "gens": ["Video Wall"], "cat": "Power", "dealer": 62.5, "enduser": 75.0, "image": null}, {"id": "hub-a1-g4-vcab-hub-a1-g4-vcab", "part": "HUB-A1-G4-VCAB", "desc": "HUB-A1-G4-VCAB", "gens": ["Video Wall"], "cat": "Hubs", "dealer": null, "enduser": null, "image": null}, {"id": "hub-b2-g4-vcab-hub-b2-g4-vcab", "part": "HUB-B2-G4-VCAB", "desc": "HUB-B2-G4-VCAB", "gens": ["Video Wall"], "cat": "Hubs", "dealer": null, "enduser": null, "image": null}, {"id": "cable-power-input-g4-vcab-cable-power-input-g4-vcab", "part": "CABLE-POWER-INPUT-G4-VCAB", "desc": "CABLE-POWER-INPUT-G4-VCAB", "gens": ["Video Wall"], "cat": "Cabling", "dealer": null, "enduser": null, "image": null}, {"id": "m-g4-vcab-3-m-g4-vcab-3", "part": "M-G4-VCAB-3", "desc": "M-G4-VCAB-3", "gens": ["Video Wall"], "cat": "Modules", "dealer": 65.0, "enduser": 78.0, "image": null}, {"id": "power-g4-vcab-power-g4-vcab", "part": "POWER-G4-VCAB", "desc": "POWER-G4-VCAB", "gens": ["Video Wall"], "cat": "Power", "dealer": 45.0, "enduser": 54.0, "image": null}]}</script>
+<script id="item-data" type="application/json">{"generated": "2026-09-14", "generations": ["G1", "G2", "G3", "G4", "G5", "Video Wall"], "categories": ["Modules", "Receivers", "Controllers", "Hubs", "Power", "Cabling", "Cellular & WiFi", "Sensors", "Tools & Misc"], "items": [{"id": "1123-c3pro-controller-1123-controller", "part": "1123 (C3Pro) Controller", "desc": "1123 Controller", "gens": ["G1", "G2", "G3", "G4", "G5"], "cat": "Controllers", "dealer": 540.0, "enduser": 772.2, "image": "images/CONTROLLER - 1123.png"}, {"id": "4g-cradlepoint-ibr200-cellular-modem-modem-only", "part": "4G Cradlepoint IBR200", "desc": "Cellular Modem, Modem Only", "gens": ["G1", "G2", "G3", "G4"], "cat": "Cellular & WiFi", "dealer": 500.0, "enduser": 715.0, "image": "images/4G - IBR200.png"}, {"id": "4g-cradlepoint-ibr200-cellular-modem-1-yr-service", "part": "4G Cradlepoint IBR200", "desc": "Cellular Modem, 1 Yr Service", "gens": ["G1", "G2"], "cat": "Cellular & WiFi", "dealer": 1043.88, "enduser": 1310.15, "image": "images/4G - IBR200.png"}, {"id": "4g-cradlepoint-ibr200-cellular-modem-1-yr-service-2", "part": "4G Cradlepoint IBR200", "desc": "Cellular Modem, 1 Yr Service", "gens": ["G3", "G4"], "cat": "Cellular & WiFi", "dealer": 750.0, "enduser": 1072.5, "image": "images/4G - IBR200.png"}, {"id": "4g-cradlepoint-ibr200-cellular-modem-5-yr-service", "part": "4G Cradlepoint IBR200", "desc": "Cellular Modem, 5 Yr Service", "gens": ["G1", "G2"], "cat": "Cellular & WiFi", "dealer": 1293.88, "enduser": 2025.15, "image": "images/4G - IBR200.png"}, {"id": "4g-cradlepoint-ibr200-cellular-modem-5-yr-service-2", "part": "4G Cradlepoint IBR200", "desc": "Cellular Modem, 5 Yr Service", "gens": ["G3", "G4"], "cat": "Cellular & WiFi", "dealer": 1250.0, "enduser": 1787.5, "image": "images/4G - IBR200.png"}, {"id": "4g-cradlepoint-ibr200-cellular-modem-lifetime-service", "part": "4G Cradlepoint IBR200", "desc": "Cellular Modem, Lifetime Service", "gens": ["G1", "G2"], "cat": "Cellular & WiFi", "dealer": 2043.88, "enduser": 3097.65, "image": "images/4G - IBR200.png"}, {"id": "4g-cradlepoint-ibr200-cellular-modem-lifetime-service-2", "part": "4G Cradlepoint IBR200", "desc": "Cellular Modem, Lifetime Service", "gens": ["G3", "G4"], "cat": "Cellular & WiFi", "dealer": 2000.0, "enduser": 2860.0, "image": "images/4G - IBR200.png"}, {"id": "4g-antennas-high-gain-4g-modem-antennas", "part": "4G-Antennas", "desc": "High Gain 4G Modem antennas", "gens": ["G1", "G2", "G3", "G4"], "cat": "Cellular & WiFi", "dealer": 49.75, "enduser": 71.14, "image": null}, {"id": "cloudps-12v-12v-power-source-for-cloud", "part": "CLOUDPS-12V", "desc": "12v Power Source for cloud", "gens": ["G1", "G2", "G3"], "cat": "Power", "dealer": 112.5, "enduser": 160.88, "image": null}, {"id": "ethernet-msl-primary-secondary-cable-long", "part": "Ethernet - MSL", "desc": "Primary Secondary Cable (LONG)", "gens": ["G1", "G2", "G3", "G4", "G5"], "cat": "Cabling", "dealer": 22.5, "enduser": 32.18, "image": null}, {"id": "ethernet-mss-primary-secondary-cable", "part": "Ethernet - MSS", "desc": "Primary Secondary Cable", "gens": ["G1", "G2", "G3", "G4", "G5"], "cat": "Cabling", "dealer": 15.0, "enduser": 21.45, "image": null}, {"id": "ethernet-swl-single-sided-weather-proof-cable-long", "part": "Ethernet - SWL", "desc": "Single Sided Weather Proof Cable (LONG)", "gens": ["G1", "G2", "G3", "G4", "G5"], "cat": "Cabling", "dealer": 37.5, "enduser": 53.63, "image": null}, {"id": "ethernet-sws-sinle-sided-weather-proof-cable-short", "part": "Ethernet - SWS", "desc": "Sinle Sided Weather Proof Cable (SHORT)", "gens": ["G1", "G2", "G3", "G4", "G5"], "cat": "Cabling", "dealer": 25.0, "enduser": 35.75, "image": null}, {"id": "ethernet-surge-protector-ethernet-surge-protector", "part": "ETHERNET-SURGE-PROTECTOR", "desc": "Ethernet Surge Protector", "gens": ["G1", "G2", "G3", "G4", "G5"], "cat": "Cabling", "dealer": 125.0, "enduser": 150.0, "image": null}, {"id": "hub-40a-40a-hub-card", "part": "HUB-40A", "desc": "40A hub card", "gens": ["G1"], "cat": "Hubs", "dealer": 42.0, "enduser": 60.06, "image": "images/HUB - 40A.png"}, {"id": "hub-p16-20x20-p16-20x20-hub-card", "part": "HUB-P16-20x20", "desc": "P16 20x20 hub card", "gens": ["G1"], "cat": "Hubs", "dealer": 42.0, "enduser": 60.06, "image": null}, {"id": "hub-p16-320-p16-320-hub-card", "part": "HUB-P16-320", "desc": "P16 320 hub card", "gens": ["G1"], "cat": "Hubs", "dealer": 42.0, "enduser": 60.06, "image": "images/HUB - P16320.png"}, {"id": "hub-p16-336-p16-336-hub-card", "part": "HUB-P16-336", "desc": "P16 336 Hub Card", "gens": ["G1"], "cat": "Hubs", "dealer": 42.0, "enduser": 60.06, "image": null}, {"id": "l-d-1-10-r-32x32-g1-10mm-rgb", "part": "L-D-1-10-R-32x32", "desc": "G1 10mm RGB", "gens": ["G1"], "cat": "Modules", "dealer": 340.0, "enduser": 486.2, "image": null}, {"id": "l-d-1-16-r-20x20-g1-16mm-rgb", "part": "L-D-1-16-R-20x20", "desc": "G1 16mm RGB", "gens": ["G1"], "cat": "Modules", "dealer": 270.0, "enduser": 386.1, "image": null}, {"id": "l-d-1-16-v-20x20-g1-16mm-rrgb", "part": "L-D-1-16-V-20x20", "desc": "G1 16mm RRGB", "gens": ["G1"], "cat": "Modules", "dealer": 345.0, "enduser": 493.35, "image": null}, {"id": "l-d-1-20-r-16x16-g1-20mm-rgb", "part": "L-D-1-20-R-16x16", "desc": "G1 20mm RGB", "gens": ["G1"], "cat": "Modules", "dealer": 200.0, "enduser": 286.0, "image": null}, {"id": "l-d-1-20-v-16x16-g1-20mm-rrgb", "part": "L-D-1-20-V-16x16", "desc": "G1 20mm RRGB", "gens": ["G1"], "cat": "Modules", "dealer": 250.0, "enduser": 357.5, "image": null}, {"id": "lrs-350-5-5v-tile-power-source-g1-and-g2", "part": "LRS-350-5", "desc": "5V Tile Power Source - G1 and G2", "gens": ["G1", "G2"], "cat": "Power", "dealer": 200.0, "enduser": 286.0, "image": "images/POWER - LRS-350-5.png"}, {"id": "mod-tool-g1-g1-wrench-2mm-square", "part": "MOD-TOOL-G1", "desc": "G1 Wrench - 2mm Square", "gens": ["G1"], "cat": "Tools & Misc", "dealer": 25.0, "enduser": 35.75, "image": null}, {"id": "poe-box-poe-injector", "part": "POE-BOX", "desc": "POE Injector", "gens": ["G1", "G2", "G3"], "cat": "Cabling", "dealer": 25.0, "enduser": 35.75, "image": null}, {"id": "rec-5a75e-i5a-75e-receiver", "part": "REC-5A75E", "desc": "i5A-75E Receiver", "gens": ["G1", "G2"], "cat": "Receivers", "dealer": 102.0, "enduser": 145.86, "image": "images/REC - I5A75E.png"}, {"id": "rec-i5a-i5a-receiver", "part": "REC-i5A", "desc": "i5A Receiver", "gens": ["G1"], "cat": "Receivers", "dealer": 102.0, "enduser": 145.86, "image": "images/REC - I5A.png"}, {"id": "term-block-g1-terminal-block-for-g1-sign", "part": "TERM-BLOCK-G1", "desc": "Terminal Block for G1 Sign", "gens": ["G1"], "cat": "Tools & Misc", "dealer": 50.0, "enduser": 71.5, "image": null}, {"id": "usba-usbb-usb-a-to-usb-b-cord", "part": "USBA-USBB", "desc": "USB-A to USB-B cord", "gens": ["G1", "G2", "G3"], "cat": "Cabling", "dealer": 7.45, "enduser": 10.65, "image": null}, {"id": "wifi-bracket-wifi-bracket", "part": "WIFI-BRACKET", "desc": "Wifi Bracket", "gens": ["G1", "G2", "G3"], "cat": "Cellular & WiFi", "dealer": 12.5, "enduser": 17.88, "image": null}, {"id": "wifi-ubiquity-radio-wifi-radio-pair", "part": "WIFI-Ubiquity Radio", "desc": "Wifi Radio (Pair)", "gens": ["G1", "G2", "G3", "G4", "G5"], "cat": "Cellular & WiFi", "dealer": 300.0, "enduser": 500.0, "image": "images/WIFI - NANOSTATIONM2.png"}, {"id": "cable-blue-3-3-blue-ethernet-cord", "part": "CABLE-BLUE-3", "desc": "3' Blue ethernet cord", "gens": ["G2"], "cat": "Cabling", "dealer": 4.7, "enduser": 6.72, "image": null}, {"id": "guide-install-g2-g2-install-guide", "part": "Guide - Install G2", "desc": "G2 Install Guide", "gens": ["G2"], "cat": "Tools & Misc", "dealer": 5.0, "enduser": 7.15, "image": null}, {"id": "guide-ms-guide-master-slave-connection-guide", "part": "Guide - MS Guide", "desc": "Master Slave Connection Guide", "gens": ["G2"], "cat": "Tools & Misc", "dealer": 5.0, "enduser": 7.15, "image": null}, {"id": "guide-wifi-wfi-kit-install-guide", "part": "Guide - Wifi", "desc": "Wfi kit install guide", "gens": ["G2", "G3", "G4"], "cat": "Tools & Misc", "dealer": 5.0, "enduser": 7.15, "image": null}, {"id": "lightsensor-light-sensor", "part": "LIGHTSENSOR", "desc": "Light Sensor", "gens": ["G2", "G3", "G5"], "cat": "Sensors", "dealer": 315.0, "enduser": 450.45, "image": null}, {"id": "m-g2-10-g2-10mm-rgb", "part": "M-G2-10", "desc": "G2 10mm RGB", "gens": ["G2"], "cat": "Modules", "dealer": 257.0, "enduser": 367.51, "image": null}, {"id": "m-g2-16-g2-16mm-rgb", "part": "M-G2-16", "desc": "G2 16mm RGB", "gens": ["G2"], "cat": "Modules", "dealer": 200.0, "enduser": 286.0, "image": null}, {"id": "m-g2-20-g2-20mm-rgb", "part": "M-G2-20", "desc": "G2 20mm RGB", "gens": ["G2"], "cat": "Modules", "dealer": 172.5, "enduser": 246.68, "image": null}, {"id": "m-g2-6-g2-6mm-rgb", "part": "M-G2-6", "desc": "G2 6mm RGB", "gens": ["G2"], "cat": "Modules", "dealer": 300.0, "enduser": 429.0, "image": null}, {"id": "mod-tool-g2-3mm-hex-wrench", "part": "MOD-TOOL-G2", "desc": "3mm Hex Wrench", "gens": ["G2"], "cat": "Tools & Misc", "dealer": 25.0, "enduser": 35.75, "image": null}, {"id": "mod-tool-g2-2-5-2-5-mm-hex-wrench", "part": "MOD-TOOL-G2-2.5", "desc": "2.5 mm Hex Wrench", "gens": ["G2"], "cat": "Tools & Misc", "dealer": 25.0, "enduser": 35.75, "image": null}, {"id": "usb-mencom-waterproof-usb-built-into-mencom-box", "part": "USB-MENCOM", "desc": "Waterproof USB built into Mencom box", "gens": ["G2", "G3"], "cat": "Cabling", "dealer": 307.76, "enduser": 440.09, "image": null}, {"id": "m-g3-10-g3-10mmrgb", "part": "M-G3-10", "desc": "G3 10mmRGB", "gens": ["G3"], "cat": "Modules", "dealer": 366.5, "enduser": 524.1, "image": null}, {"id": "m-g3-15-g3-15mmrgb", "part": "M-G3-15", "desc": "G3 15mmRGB", "gens": ["G3"], "cat": "Modules", "dealer": 269.5, "enduser": 385.39, "image": null}, {"id": "m-g3-20-g3-20mmrgb", "part": "M-G3-20", "desc": "G3 20mmRGB", "gens": ["G3"], "cat": "Modules", "dealer": 197.5, "enduser": 282.43, "image": null}, {"id": "m-g3-6-g3-6mmrgb", "part": "M-G3-6", "desc": "G3 6mmRGB", "gens": ["G3"], "cat": "Modules", "dealer": 395.0, "enduser": 564.85, "image": null}, {"id": "power-supply-great-wall-3-8-v", "part": "Power Supply", "desc": "Great Wall 3.8 V", "gens": ["G3"], "cat": "Power", "dealer": 140.0, "enduser": 200.2, "image": null}, {"id": "power-breaker-g3-g3-internal-power-breaker", "part": "POWER-BREAKER-G3", "desc": "G3 Internal Power Breaker", "gens": ["G3"], "cat": "Power", "dealer": 112.5, "enduser": 135.0, "image": null}, {"id": "power-g3-v2-mean-well-3-8v", "part": "POWER-G3-V2", "desc": "Mean Well 3.8V", "gens": ["G3"], "cat": "Power", "dealer": 105.0, "enduser": 126.0, "image": null}, {"id": "rec-907-g3-cabinet-receive-card", "part": "REC-907", "desc": "G3 Cabinet Receive Card", "gens": ["G3"], "cat": "Receivers", "dealer": 102.0, "enduser": 145.86, "image": "images/REC - i5-907.png"}, {"id": "rec-i5-g3-cabinet-receive-card", "part": "REC-i5+", "desc": "G3 Cabinet Receive Card", "gens": ["G3"], "cat": "Receivers", "dealer": 102.0, "enduser": 145.86, "image": "images/REC - i5+.png"}, {"id": "surge-protector-g3-g3-internal-surge-protector", "part": "SURGE-PROTECTOR-G3", "desc": "G3 Internal Surge Protector", "gens": ["G3"], "cat": "Power", "dealer": 35.79, "enduser": 42.95, "image": null}, {"id": "4g-digiwr11xt-4g-modem-digi-wr11-xt", "part": "4G-DIGIWR11XT", "desc": "4G Modem, Digi WR11 XT", "gens": ["G4"], "cat": "Cellular & WiFi", "dealer": 800.0, "enduser": 1144.0, "image": "images/4G - DIGI.png"}, {"id": "bag-parts-parts-bag-for-shipping", "part": "BAG-PARTS", "desc": "Parts bag for shipping", "gens": ["G4"], "cat": "Tools & Misc", "dealer": 5.0, "enduser": 7.15, "image": null}, {"id": "cable-g4-module-cable-g4-module", "part": "Cable-G4-Module", "desc": "Cable-G4-Module", "gens": ["G4"], "cat": "Cabling", "dealer": 40.0, "enduser": 50.0, "image": null}, {"id": "cb-g4-communication-v4-g4-communication-box", "part": "CB-G4-COMMUNICATION-V4", "desc": "G4 Communication Box", "gens": ["G4"], "cat": "Controllers", "dealer": 100.0, "enduser": 120.0, "image": null}, {"id": "cb-g4-controller-v3-g4-control-box", "part": "CB-G4-CONTROLLER-V3", "desc": "G4 Control Box", "gens": ["G4"], "cat": "Controllers", "dealer": 125.0, "enduser": 150.0, "image": null}, {"id": "lightsensor-light-sensor-for-psd-100-and-msd-300", "part": "LIGHTSENSOR", "desc": "Light Sensor for PSD 100 and MSD 300", "gens": ["G4"], "cat": "Sensors", "dealer": 315.0, "enduser": 450.45, "image": null}, {"id": "m-g4-15-g4-15mm-rgb", "part": "M-G4-15", "desc": "G4 15mm RGB", "gens": ["G4"], "cat": "Modules", "dealer": 190.0, "enduser": 271.7, "image": null}, {"id": "m-g4-4-g4-4mm-rgb", "part": "M-G4-4", "desc": "G4 4mm RGB", "gens": ["G4"], "cat": "Modules", "dealer": 565.0, "enduser": 807.95, "image": null}, {"id": "m-g4-6-g4-6mm-rgb", "part": "M-G4-6", "desc": "G4 6mm RGB", "gens": ["G4"], "cat": "Modules", "dealer": 455.0, "enduser": 650.65, "image": null}, {"id": "m-g4-9-g4-9mm-rgb", "part": "M-G4-9", "desc": "G4 9mm RGB", "gens": ["G4"], "cat": "Modules", "dealer": 305.0, "enduser": 436.15, "image": null}, {"id": "pb-g4-5l-power-box-5-port-long", "part": "PB-G4-5L", "desc": "Power Box - 5 port long", "gens": ["G4"], "cat": "Power", "dealer": 338.0, "enduser": 405.0, "image": null}, {"id": "pb-g4-5s-power-box-5-port-short", "part": "PB-G4-5S", "desc": "Power Box- 5 port short", "gens": ["G4"], "cat": "Power", "dealer": 355.0, "enduser": 426.0, "image": null}, {"id": "pb-g4-8-power-box-8-port", "part": "PB-G4-8", "desc": "Power Box- 8 port", "gens": ["G4"], "cat": "Power", "dealer": 375.0, "enduser": 450.0, "image": null}, {"id": "4g-s400-cradlepoint-s400-modem", "part": "4G-S400", "desc": "Cradlepoint S400 Modem", "gens": ["G5"], "cat": "Cellular & WiFi", "dealer": 793.88, "enduser": 952.65, "image": "images/4G - S400.png"}, {"id": "4g-s400-cellular-modem-1-yr-service", "part": "4G-S400", "desc": "Cellular Modem, 1 Yr Service", "gens": ["G5"], "cat": "Cellular & WiFi", "dealer": 1043.88, "enduser": 1310.15, "image": "images/4G - S400.png"}, {"id": "4g-s400-cellular-modem-5-yr-service", "part": "4G-S400", "desc": "Cellular Modem, 5 Yr Service", "gens": ["G5"], "cat": "Cellular & WiFi", "dealer": 1293.88, "enduser": 2025.15, "image": "images/4G - S400.png"}, {"id": "4g-s400-cellular-modem-lifetime-service", "part": "4G-S400", "desc": "Cellular Modem, Lifetime Service", "gens": ["G5"], "cat": "Cellular & WiFi", "dealer": 2043.88, "enduser": 3097.65, "image": "images/4G - S400.png"}, {"id": "cb-g5-com-g5-combox", "part": "CB-G5-COM", "desc": "G5 Combox", "gens": ["G5"], "cat": "Controllers", "dealer": 112.5, "enduser": 135.0, "image": null}, {"id": "cb-g5-ctrl-g5-control-box", "part": "CB-G5-CTRL", "desc": "G5 Control Box", "gens": ["G5"], "cat": "Controllers", "dealer": 262.5, "enduser": 315.0, "image": null}, {"id": "cbr-g5-cbr-g5-26011901-54", "part": "CBR-G5", "desc": "CBR-G5-26011901-54", "gens": ["G5"], "cat": "Controllers", "dealer": null, "enduser": null, "image": null}, {"id": "hub-g5-2-hub-g5-2-26011901-09", "part": "HUB-G5-2", "desc": "HUB-G5-2-26011901-09", "gens": ["G5"], "cat": "Hubs", "dealer": 33.75, "enduser": 40.5, "image": null}, {"id": "hub-g5-3-hub-g5-3-26011901-10", "part": "HUB-G5-3", "desc": "HUB-G5-3-26011901-10", "gens": ["G5"], "cat": "Hubs", "dealer": 53.63, "enduser": 64.35, "image": null}, {"id": "hub-g5-4-hub-g5-4-26011901-11", "part": "HUB-G5-4", "desc": "HUB-G5-4-26011901-11", "gens": ["G5"], "cat": "Hubs", "dealer": 72.15, "enduser": 86.58, "image": null}, {"id": "hub-g5-indv-single-g5-hub-used-in-3-high-cabinets", "part": "Hub-G5-Indv", "desc": "Single G5 Hub used in 3-high cabinets.", "gens": ["G5"], "cat": "Hubs", "dealer": null, "enduser": null, "image": null}, {"id": "m-g5-1-56-m-g5-1-56-26013001-04", "part": "M-G5-1.56", "desc": "M-G5-1.56-26013001 -04", "gens": ["G5"], "cat": "Modules", "dealer": 83.25, "enduser": 99.9, "image": null}, {"id": "m-g5-15-g5-15mm-rgb", "part": "M-G5-15", "desc": "G5 15mm RGB", "gens": ["G5"], "cat": "Modules", "dealer": 210.0, "enduser": 300.3, "image": null}, {"id": "m-g5-4-g5-4mm-rgb", "part": "M-G5-4", "desc": "G5 4mm RGB", "gens": ["G5"], "cat": "Modules", "dealer": 600.0, "enduser": 858.0, "image": null}, {"id": "m-g5-6-g5-6mm-rgb", "part": "M-G5-6", "desc": "G5 6mm RGB", "gens": ["G5"], "cat": "Modules", "dealer": 375.0, "enduser": 536.25, "image": null}, {"id": "m-g5-9-g5-9mm-rgb", "part": "M-G5-9", "desc": "G5 9mm RGB", "gens": ["G5"], "cat": "Modules", "dealer": 300.0, "enduser": 429.0, "image": null}, {"id": "pb-g5-2-pb-g5-2-26011901-05", "part": "PB-G5-2", "desc": "PB-G5-2-26011901-05", "gens": ["G5"], "cat": "Power", "dealer": 316.25, "enduser": 379.5, "image": null}, {"id": "pb-g5-3-d-3-wide-power-bar-with-two-power-supplies", "part": "PB-G5-3-D", "desc": "3 Wide power bar with two power supplies", "gens": ["G5"], "cat": "Power", "dealer": 512.5, "enduser": 615.0, "image": null}, {"id": "pb-g5-3-s-3-wide-power-bar-with-one-power-supply", "part": "PB-G5-3-S", "desc": "3 Wide power bar with one power supply", "gens": ["G5"], "cat": "Power", "dealer": 383.0, "enduser": 459.6, "image": null}, {"id": "pb-g5-4-pb-g5-4-26011901-07", "part": "PB-G5-4", "desc": "PB-G5-4-26011901-07", "gens": ["G5"], "cat": "Power", "dealer": 570.0, "enduser": 684.0, "image": null}, {"id": "pwr-g5-mcp200-vcab-pwr-g5-mcp200-vcab", "part": "PWR-G5-MCP200-VCAB", "desc": "PWR-G5-MCP200-VCAB", "gens": ["G5", "Video Wall"], "cat": "Power", "dealer": 37.5, "enduser": 45.0, "image": null}, {"id": "m-g4-1-5-video-wall-1-5mm-rgb", "part": "M-G4-1.5", "desc": "Video Wall 1.5mm RGB", "gens": ["Video Wall"], "cat": "Modules", "dealer": 300.0, "enduser": 429.0, "image": null}, {"id": "m-g4-1-8-video-wall-1-8mm-rgb", "part": "M-G4-1.8", "desc": "Video Wall 1.8mm RGB", "gens": ["Video Wall"], "cat": "Modules", "dealer": 312.5, "enduser": 446.88, "image": null}, {"id": "m-g4-1-91-video-wall-1-91mm-rgb", "part": "M-G4-1.91", "desc": "Video Wall 1.91mm RGB", "gens": ["Video Wall"], "cat": "Modules", "dealer": 325.0, "enduser": 464.75, "image": null}, {"id": "m-g4-2-video-wall-2mm-rgb", "part": "M-G4-2", "desc": "Video Wall 2mm RGB", "gens": ["Video Wall"], "cat": "Modules", "dealer": 250.0, "enduser": 357.5, "image": null}, {"id": "m-g4-2-5-video-wall-2-5mm-rgb", "part": "M-G4-2 .5", "desc": "Video Wall 2.5mm RGB", "gens": ["Video Wall"], "cat": "Modules", "dealer": 175.0, "enduser": 250.25, "image": null}, {"id": "m-g4-2-6-video-wall-2-6mm-rgb", "part": "M-G4-2.6", "desc": "Video Wall 2.6mm RGB", "gens": ["Video Wall"], "cat": "Modules", "dealer": 175.0, "enduser": 250.25, "image": null}, {"id": "m-g4-3-91-video-wall-3-91mm-rgb", "part": "M-G4-3.91", "desc": "Video Wall 3.91mm RGB", "gens": ["Video Wall"], "cat": "Modules", "dealer": 120.0, "enduser": 171.6, "image": null}, {"id": "magnet-tool-module-removal-tool", "part": "MAGNET-TOOL", "desc": "Module Removal Tool", "gens": ["Video Wall"], "cat": "Tools & Misc", "dealer": null, "enduser": null, "image": null}, {"id": "controller-x100-pro-7u-controller-x100-pro-7u", "part": "CONTROLLER-X100-PRO-7U", "desc": "CONTROLLER-X100-PRO-7U", "gens": ["Video Wall"], "cat": "Controllers", "dealer": null, "enduser": null, "image": null}, {"id": "controller-a200-controller-a200", "part": "CONTROLLER-A200", "desc": "CONTROLLER-A200", "gens": ["Video Wall"], "cat": "Controllers", "dealer": 1340.0, "enduser": 1926.25, "image": null}, {"id": "rec-k5-g4-rec-k5-g4", "part": "REC-K5+-G4", "desc": "REC-K5+-G4", "gens": ["Video Wall"], "cat": "Receivers", "dealer": null, "enduser": null, "image": null}, {"id": "hub-a3-g4-vcab-hub-a3-g4-vcab", "part": "HUB-A3-G4-VCAB", "desc": "HUB-A3-G4-VCAB", "gens": ["Video Wall"], "cat": "Hubs", "dealer": 37.5, "enduser": 45.0, "image": null}, {"id": "hub-b1-g4-vcab-hub-b1-g4-vcab", "part": "HUB-B1-G4-VCAB", "desc": "HUB-B1-G4-VCAB", "gens": ["Video Wall"], "cat": "Hubs", "dealer": 58.33, "enduser": 69.99, "image": null}, {"id": "power-dsp-300k-vcab-power-dsp-300k-vcab", "part": "POWER-DSP-300K-VCAB", "desc": "POWER-DSP-300K-VCAB", "gens": ["Video Wall"], "cat": "Power", "dealer": 62.5, "enduser": 75.0, "image": null}, {"id": "power-dsp-200k-vcab-power-dsp-200k-vcab", "part": "POWER-DSP-200K-VCAB", "desc": "POWER-DSP-200K-VCAB", "gens": ["Video Wall"], "cat": "Power", "dealer": 62.5, "enduser": 75.0, "image": null}, {"id": "hub-a1-g4-vcab-hub-a1-g4-vcab", "part": "HUB-A1-G4-VCAB", "desc": "HUB-A1-G4-VCAB", "gens": ["Video Wall"], "cat": "Hubs", "dealer": null, "enduser": null, "image": null}, {"id": "hub-b2-g4-vcab-hub-b2-g4-vcab", "part": "HUB-B2-G4-VCAB", "desc": "HUB-B2-G4-VCAB", "gens": ["Video Wall"], "cat": "Hubs", "dealer": null, "enduser": null, "image": null}, {"id": "cable-power-input-g4-vcab-cable-power-input-g4-vcab", "part": "CABLE-POWER-INPUT-G4-VCAB", "desc": "CABLE-POWER-INPUT-G4-VCAB", "gens": ["Video Wall"], "cat": "Cabling", "dealer": null, "enduser": null, "image": null}, {"id": "m-g4-vcab-3-m-g4-vcab-3", "part": "M-G4-VCAB-3", "desc": "M-G4-VCAB-3", "gens": ["Video Wall"], "cat": "Modules", "dealer": 65.0, "enduser": 78.0, "image": null}, {"id": "power-g4-vcab-power-g4-vcab", "part": "POWER-G4-VCAB", "desc": "POWER-G4-VCAB", "gens": ["Video Wall"], "cat": "Power", "dealer": 45.0, "enduser": 54.0, "image": null}]}</script>
 <script>
 (function () {
   'use strict';
@@ -735,6 +760,7 @@ footer span { color: var(--red); }
     missingOnly: false,
     priceView: 'both',
     basis: 'dealer',
+    qDiscMode: 'pct',
     sel: loadSelection()
   };
 
@@ -749,6 +775,20 @@ footer span { color: var(--red); }
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
   function priceable(it) { return it.dealer != null || it.enduser != null; }
+
+  // A discount is either a percentage of the line, or a flat dollar amount off
+  // the LINE TOTAL (not per unit). Both are clamped so a line can never go
+  // negative and a percentage can never exceed 100.
+  function applyDiscount(gross, disc, mode) {
+    var d = Math.max(0, Number(disc) || 0);
+    if (mode === 'amt') return Math.max(0, gross - Math.min(gross, d));
+    return gross * (1 - Math.min(100, d) / 100);
+  }
+  function discountLabel(disc, mode) {
+    var d = Math.max(0, Number(disc) || 0);
+    if (!d) return '';
+    return mode === 'amt' ? '−' + money(d) : d + '%';
+  }
   function unitPrice(it, basis) {
     var p = basis === 'enduser' ? it.enduser : it.dealer;
     return p == null ? 0 : p;
@@ -764,9 +804,14 @@ footer span { color: var(--red); }
       var out = {};
       Object.keys(raw).forEach(function (id) {
         if (BY_ID[id]) {
+          // discMode is newer than the original format; anything saved before
+          // it existed is a percentage.
+          var mode = raw[id].discMode === 'amt' ? 'amt' : 'pct';
+          var disc = Math.max(0, parseFloat(raw[id].disc) || 0);
           out[id] = {
             qty: Math.max(1, parseInt(raw[id].qty, 10) || 1),
-            disc: Math.min(100, Math.max(0, parseFloat(raw[id].disc) || 0))
+            disc: mode === 'pct' ? Math.min(100, disc) : disc,
+            discMode: mode
           };
         }
       });
@@ -945,7 +990,10 @@ footer span { color: var(--red); }
   // ---------------------------------------------------------------- tray
   function selectedItems() {
     return Object.keys(state.sel).map(function (id) {
-      return { item: BY_ID[id], qty: state.sel[id].qty, disc: state.sel[id].disc };
+      return {
+        item: BY_ID[id], qty: state.sel[id].qty,
+        disc: state.sel[id].disc, discMode: state.sel[id].discMode || 'pct'
+      };
     }).filter(function (l) { return l.item; });
   }
 
@@ -953,7 +1001,7 @@ footer span { color: var(--red); }
     var lines = selectedItems();
     var units = lines.reduce(function (a, l) { return a + l.qty; }, 0);
     var total = lines.reduce(function (a, l) {
-      return a + unitPrice(l.item, state.basis) * l.qty * (1 - l.disc / 100);
+      return a + applyDiscount(unitPrice(l.item, state.basis) * l.qty, l.disc, l.discMode);
     }, 0);
 
     document.getElementById('tray-items').textContent = lines.length;
@@ -988,7 +1036,7 @@ footer span { color: var(--red); }
       if (state.sel[id]) {
         delete state.sel[id];
       } else {
-        state.sel[id] = { qty: Math.max(1, parseInt(input.value, 10) || 1), disc: 0 };
+        state.sel[id] = { qty: Math.max(1, parseInt(input.value, 10) || 1), disc: 0, discMode: 'pct' };
       }
       saveSelection();
       card.classList.toggle('selected', !!state.sel[id]);
@@ -1112,19 +1160,21 @@ footer span { color: var(--red); }
     var lines = selectedItems().map(function (l) {
       var unit = unitPrice(l.item, state.basis);
       return {
-        item: l.item, qty: l.qty, disc: l.disc, unit: unit,
-        ext: unit * l.qty * (1 - l.disc / 100)
+        item: l.item, qty: l.qty, disc: l.disc, discMode: l.discMode, unit: unit,
+        gross: unit * l.qty,
+        ext: applyDiscount(unit * l.qty, l.disc, l.discMode)
       };
     });
     var subtotal = lines.reduce(function (a, l) { return a + l.ext; }, 0);
-    var qDisc  = Math.min(100, Math.max(0, parseFloat(document.getElementById('q-discount').value) || 0));
+    var qDisc  = Math.max(0, parseFloat(document.getElementById('q-discount').value) || 0);
     var taxPct = Math.max(0, parseFloat(document.getElementById('q-tax').value) || 0);
     var ship   = Math.max(0, parseFloat(document.getElementById('q-shipping').value) || 0);
-    var discAmt = subtotal * (qDisc / 100);
-    var afterDisc = subtotal - discAmt;
+    var afterDisc = applyDiscount(subtotal, qDisc, state.qDiscMode);
+    var discAmt = subtotal - afterDisc;
     var tax = (afterDisc + ship) * (taxPct / 100);
     return {
-      lines: lines, subtotal: subtotal, qDisc: qDisc, discAmt: discAmt,
+      lines: lines, subtotal: subtotal,
+      qDisc: qDisc, qDiscMode: state.qDiscMode, discAmt: discAmt,
       taxPct: taxPct, tax: tax, ship: ship, total: afterDisc + ship + tax
     };
   }
@@ -1141,7 +1191,14 @@ footer span { color: var(--red); }
           '<td class="hide-sm"><span class="tag">' + esc(genShort(l.item.gens[0])) + '</span></td>' +
           '<td><input type="number" min="1" step="1" value="' + l.qty + '" data-f="qty" /></td>' +
           '<td class="num">' + money(l.unit) + '</td>' +
-          '<td><input type="number" min="0" max="100" step="0.5" value="' + l.disc + '" data-f="disc" /></td>' +
+          '<td><div class="disc-cell">' +
+            '<input type="number" min="0" step="' + (l.discMode === 'amt' ? '1' : '0.5') + '"' +
+              (l.discMode === 'pct' ? ' max="100"' : '') +
+              ' value="' + l.disc + '" data-f="disc" aria-label="Discount" />' +
+            '<button type="button" class="mode-btn' + (l.discMode === 'amt' ? ' amt' : '') + '" ' +
+              'data-f="discmode" title="Switch between percent and dollars">' +
+              (l.discMode === 'amt' ? '$' : '%') + '</button>' +
+          '</div></td>' +
           '<td class="num ext">' + money(l.ext) + '</td>' +
           '<td><button class="line-remove" data-f="del" title="Remove">&times;</button></td>' +
         '</tr>';
@@ -1151,20 +1208,7 @@ footer span { color: var(--red); }
       m.lines.length + ' item' + (m.lines.length === 1 ? '' : 's') + ' · ' +
       (state.basis === 'enduser' ? 'End user pricing' : 'Dealer pricing');
 
-    var rows = '<div class="row"><span class="k">Subtotal</span><span class="v">' + money(m.subtotal) + '</span></div>';
-    if (m.qDisc > 0) {
-      rows += '<div class="row discount"><span class="k">Quote discount (' + m.qDisc + '%)</span>' +
-              '<span class="v">&minus;' + money(m.discAmt) + '</span></div>';
-    }
-    if (m.ship > 0) {
-      rows += '<div class="row"><span class="k">Shipping</span><span class="v">' + money(m.ship) + '</span></div>';
-    }
-    if (m.taxPct > 0) {
-      rows += '<div class="row"><span class="k">Tax (' + m.taxPct + '%)</span><span class="v">' + money(m.tax) + '</span></div>';
-    }
-    rows += '<div class="row grand"><span class="k">Total</span><span class="v">' + money(m.total) + '</span></div>';
-    document.getElementById('totals').innerHTML = rows;
-
+    renderTotalsInto(document.getElementById('totals'), m);
     updateTray();
   }
 
@@ -1176,9 +1220,38 @@ footer span { color: var(--red); }
     if (f === 'qty') {
       state.sel[id].qty = Math.max(1, parseInt(e.target.value, 10) || 1);
     } else {
-      state.sel[id].disc = Math.min(100, Math.max(0, parseFloat(e.target.value) || 0));
+      var d = Math.max(0, parseFloat(e.target.value) || 0);
+      state.sel[id].disc = state.sel[id].discMode === 'amt' ? d : Math.min(100, d);
     }
     saveSelection();
+    refreshTotalsOnly();
+  });
+
+  document.getElementById('lines-body').addEventListener('click', function (e) {
+    if (!e.target.matches('[data-f="discmode"]')) return;
+    var id = e.target.closest('tr').dataset.id;
+    var sel = state.sel[id];
+    if (!sel) return;
+    // Switching units keeps the number the user typed rather than converting it
+    // -- converting silently would change the quoted price without them asking.
+    sel.discMode = sel.discMode === 'amt' ? 'pct' : 'amt';
+    if (sel.discMode === 'pct') sel.disc = Math.min(100, sel.disc);
+    saveSelection();
+    renderLines();
+  });
+
+  document.getElementById('q-discount-mode').addEventListener('click', function () {
+    state.qDiscMode = state.qDiscMode === 'amt' ? 'pct' : 'amt';
+    var btn = document.getElementById('q-discount-mode');
+    var input = document.getElementById('q-discount');
+    btn.textContent = state.qDiscMode === 'amt' ? '$' : '%';
+    btn.classList.toggle('amt', state.qDiscMode === 'amt');
+    if (state.qDiscMode === 'pct') {
+      input.max = '100';
+      if ((parseFloat(input.value) || 0) > 100) input.value = '100';
+    } else {
+      input.removeAttribute('max');
+    }
     refreshTotalsOnly();
   });
 
@@ -1209,8 +1282,9 @@ footer span { color: var(--red); }
 
   function renderTotalsInto(host, m) {
     var rows = '<div class="row"><span class="k">Subtotal</span><span class="v">' + money(m.subtotal) + '</span></div>';
-    if (m.qDisc > 0) {
-      rows += '<div class="row discount"><span class="k">Quote discount (' + m.qDisc + '%)</span>' +
+    if (m.discAmt > 0) {
+      rows += '<div class="row discount"><span class="k">Quote discount' +
+              (m.qDiscMode === 'pct' ? ' (' + m.qDisc + '%)' : '') + '</span>' +
               '<span class="v">&minus;' + money(m.discAmt) + '</span></div>';
     }
     if (m.ship > 0) rows += '<div class="row"><span class="k">Shipping</span><span class="v">' + money(m.ship) + '</span></div>';
@@ -1302,14 +1376,16 @@ footer span { color: var(--red); }
           '<td class="c"><span class="gtag">' + esc(l.item.gens.map(genShort).join(' / ')) + '</span></td>' +
           '<td class="c">' + l.qty + '</td>' +
           '<td class="n">' + money(l.unit) + '</td>' +
-          '<td class="c">' + (l.disc > 0 ? l.disc + '%' : '—') + '</td>' +
+          '<td class="c">' + (discountLabel(l.disc, l.discMode) || '—') + '</td>' +
           '<td class="n b">' + money(l.ext) + '</td>' +
         '</tr>';
     }).join('');
 
     var totalRows = '<tr><td>Subtotal</td><td class="n">' + money(m.subtotal) + '</td></tr>';
-    if (m.qDisc > 0) {
-      totalRows += '<tr class="disc"><td>Quote discount (' + m.qDisc + '%)</td><td class="n">&minus;' + money(m.discAmt) + '</td></tr>';
+    if (m.discAmt > 0) {
+      totalRows += '<tr class="disc"><td>Quote discount' +
+        (m.qDiscMode === 'pct' ? ' (' + m.qDisc + '%)' : '') +
+        '</td><td class="n">&minus;' + money(m.discAmt) + '</td></tr>';
     }
     if (m.ship > 0) totalRows += '<tr><td>Shipping &amp; handling</td><td class="n">' + money(m.ship) + '</td></tr>';
     if (m.taxPct > 0) totalRows += '<tr><td>Tax (' + m.taxPct + '%)</td><td class="n">' + money(m.tax) + '</td></tr>';

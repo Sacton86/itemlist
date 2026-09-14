@@ -16,6 +16,11 @@ install, no server, no internet needed once loaded.
 - Pick **Dealer** or **End User** pricing, fill in the customer details, and
   **Preview Quote** → Print / Save as PDF.
 
+Discounts work per line and on the whole quote. Each one has a **% / $** button —
+click it to switch between a percentage and a flat dollar amount. A dollar discount
+comes off that line's **total**, not off each unit. Switching units keeps the number
+you typed rather than converting it, so nothing changes price behind your back.
+
 The pricing basis is an internal setting — it never appears on the printed quote.
 
 ## Updating prices

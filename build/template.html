@@ -481,6 +481,26 @@ main {
 }
 .lines input::-webkit-outer-spin-button, .lines input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .lines input:focus { outline: none; border-color: var(--red); }
+
+/* ── DISCOUNT MODE TOGGLE (% vs $) ── */
+.disc-cell { display: flex; align-items: stretch; gap: 0; }
+.disc-cell input {
+  width: 52px; border-radius: 5px 0 0 5px; border-right: none; text-align: right; padding-right: 5px;
+}
+.mode-btn {
+  font-family: inherit; font-size: .78rem; font-weight: 700;
+  width: 25px; flex-shrink: 0;
+  border: 1px solid var(--gray-200); border-radius: 0 5px 5px 0;
+  background: var(--gray-100); color: var(--gray-500);
+  cursor: pointer; padding: 0; line-height: 1;
+  transition: background .15s, color .15s;
+}
+.mode-btn:hover { background: var(--gray-200); color: var(--black); }
+.mode-btn.amt { background: var(--red); border-color: var(--red); color: var(--white); }
+
+/* same control, inside the left-hand form */
+.field .disc-cell input { width: 100%; font-size: .85rem; padding: 8px 10px; text-align: left; }
+.field .disc-cell .mode-btn { width: 34px; font-size: .88rem; }
 .lines .ext { font-weight: 700; color: var(--black); }
 .line-remove {
   background: none; border: none; color: var(--gray-300); cursor: pointer;
@@ -646,7 +666,12 @@ footer span { color: var(--red); }
         <div class="field-group">
           <h3>Adjustments</h3>
           <div class="field-2">
-            <div class="field"><label>Quote Discount %</label><input id="q-discount" type="number" min="0" max="100" step="0.1" value="0" /></div>
+            <div class="field"><label>Quote Discount</label>
+              <div class="disc-cell">
+                <input id="q-discount" type="number" min="0" step="0.1" value="0" />
+                <button type="button" class="mode-btn" id="q-discount-mode" title="Switch between percent and dollars">%</button>
+              </div>
+            </div>
             <div class="field"><label>Tax Rate %</label><input id="q-tax" type="number" min="0" step="0.001" value="0" /></div>
           </div>
           <div class="field"><label>Shipping ($)</label><input id="q-shipping" type="number" min="0" step="0.01" value="0" /></div>
@@ -670,7 +695,7 @@ footer span { color: var(--red); }
               <th class="hide-sm">Gen</th>
               <th style="width:78px">Qty</th>
               <th class="num">Unit</th>
-              <th style="width:78px">Disc %</th>
+              <th style="width:92px">Discount</th>
               <th class="num">Extended</th>
               <th style="width:28px"></th>
             </tr>
@@ -735,6 +760,7 @@ footer span { color: var(--red); }
     missingOnly: false,
     priceView: 'both',
     basis: 'dealer',
+    qDiscMode: 'pct',
     sel: loadSelection()
   };
 
@@ -749,6 +775,20 @@ footer span { color: var(--red); }
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
   function priceable(it) { return it.dealer != null || it.enduser != null; }
+
+  // A discount is either a percentage of the line, or a flat dollar amount off
+  // the LINE TOTAL (not per unit). Both are clamped so a line can never go
+  // negative and a percentage can never exceed 100.
+  function applyDiscount(gross, disc, mode) {
+    var d = Math.max(0, Number(disc) || 0);
+    if (mode === 'amt') return Math.max(0, gross - Math.min(gross, d));
+    return gross * (1 - Math.min(100, d) / 100);
+  }
+  function discountLabel(disc, mode) {
+    var d = Math.max(0, Number(disc) || 0);
+    if (!d) return '';
+    return mode === 'amt' ? '−' + money(d) : d + '%';
+  }
   function unitPrice(it, basis) {
     var p = basis === 'enduser' ? it.enduser : it.dealer;
     return p == null ? 0 : p;
@@ -764,9 +804,14 @@ footer span { color: var(--red); }
       var out = {};
       Object.keys(raw).forEach(function (id) {
         if (BY_ID[id]) {
+          // discMode is newer than the original format; anything saved before
+          // it existed is a percentage.
+          var mode = raw[id].discMode === 'amt' ? 'amt' : 'pct';
+          var disc = Math.max(0, parseFloat(raw[id].disc) || 0);
           out[id] = {
             qty: Math.max(1, parseInt(raw[id].qty, 10) || 1),
-            disc: Math.min(100, Math.max(0, parseFloat(raw[id].disc) || 0))
+            disc: mode === 'pct' ? Math.min(100, disc) : disc,
+            discMode: mode
           };
         }
       });
@@ -945,7 +990,10 @@ footer span { color: var(--red); }
   // ---------------------------------------------------------------- tray
   function selectedItems() {
     return Object.keys(state.sel).map(function (id) {
-      return { item: BY_ID[id], qty: state.sel[id].qty, disc: state.sel[id].disc };
+      return {
+        item: BY_ID[id], qty: state.sel[id].qty,
+        disc: state.sel[id].disc, discMode: state.sel[id].discMode || 'pct'
+      };
     }).filter(function (l) { return l.item; });
   }
 
@@ -953,7 +1001,7 @@ footer span { color: var(--red); }
     var lines = selectedItems();
     var units = lines.reduce(function (a, l) { return a + l.qty; }, 0);
     var total = lines.reduce(function (a, l) {
-      return a + unitPrice(l.item, state.basis) * l.qty * (1 - l.disc / 100);
+      return a + applyDiscount(unitPrice(l.item, state.basis) * l.qty, l.disc, l.discMode);
     }, 0);
 
     document.getElementById('tray-items').textContent = lines.length;
@@ -988,7 +1036,7 @@ footer span { color: var(--red); }
       if (state.sel[id]) {
         delete state.sel[id];
       } else {
-        state.sel[id] = { qty: Math.max(1, parseInt(input.value, 10) || 1), disc: 0 };
+        state.sel[id] = { qty: Math.max(1, parseInt(input.value, 10) || 1), disc: 0, discMode: 'pct' };
       }
       saveSelection();
       card.classList.toggle('selected', !!state.sel[id]);
@@ -1112,19 +1160,21 @@ footer span { color: var(--red); }
     var lines = selectedItems().map(function (l) {
       var unit = unitPrice(l.item, state.basis);
       return {
-        item: l.item, qty: l.qty, disc: l.disc, unit: unit,
-        ext: unit * l.qty * (1 - l.disc / 100)
+        item: l.item, qty: l.qty, disc: l.disc, discMode: l.discMode, unit: unit,
+        gross: unit * l.qty,
+        ext: applyDiscount(unit * l.qty, l.disc, l.discMode)
       };
     });
     var subtotal = lines.reduce(function (a, l) { return a + l.ext; }, 0);
-    var qDisc  = Math.min(100, Math.max(0, parseFloat(document.getElementById('q-discount').value) || 0));
+    var qDisc  = Math.max(0, parseFloat(document.getElementById('q-discount').value) || 0);
     var taxPct = Math.max(0, parseFloat(document.getElementById('q-tax').value) || 0);
     var ship   = Math.max(0, parseFloat(document.getElementById('q-shipping').value) || 0);
-    var discAmt = subtotal * (qDisc / 100);
-    var afterDisc = subtotal - discAmt;
+    var afterDisc = applyDiscount(subtotal, qDisc, state.qDiscMode);
+    var discAmt = subtotal - afterDisc;
     var tax = (afterDisc + ship) * (taxPct / 100);
     return {
-      lines: lines, subtotal: subtotal, qDisc: qDisc, discAmt: discAmt,
+      lines: lines, subtotal: subtotal,
+      qDisc: qDisc, qDiscMode: state.qDiscMode, discAmt: discAmt,
       taxPct: taxPct, tax: tax, ship: ship, total: afterDisc + ship + tax
     };
   }
@@ -1141,7 +1191,14 @@ footer span { color: var(--red); }
           '<td class="hide-sm"><span class="tag">' + esc(genShort(l.item.gens[0])) + '</span></td>' +
           '<td><input type="number" min="1" step="1" value="' + l.qty + '" data-f="qty" /></td>' +
           '<td class="num">' + money(l.unit) + '</td>' +
-          '<td><input type="number" min="0" max="100" step="0.5" value="' + l.disc + '" data-f="disc" /></td>' +
+          '<td><div class="disc-cell">' +
+            '<input type="number" min="0" step="' + (l.discMode === 'amt' ? '1' : '0.5') + '"' +
+              (l.discMode === 'pct' ? ' max="100"' : '') +
+              ' value="' + l.disc + '" data-f="disc" aria-label="Discount" />' +
+            '<button type="button" class="mode-btn' + (l.discMode === 'amt' ? ' amt' : '') + '" ' +
+              'data-f="discmode" title="Switch between percent and dollars">' +
+              (l.discMode === 'amt' ? '$' : '%') + '</button>' +
+          '</div></td>' +
           '<td class="num ext">' + money(l.ext) + '</td>' +
           '<td><button class="line-remove" data-f="del" title="Remove">&times;</button></td>' +
         '</tr>';
@@ -1151,20 +1208,7 @@ footer span { color: var(--red); }
       m.lines.length + ' item' + (m.lines.length === 1 ? '' : 's') + ' · ' +
       (state.basis === 'enduser' ? 'End user pricing' : 'Dealer pricing');
 
-    var rows = '<div class="row"><span class="k">Subtotal</span><span class="v">' + money(m.subtotal) + '</span></div>';
-    if (m.qDisc > 0) {
-      rows += '<div class="row discount"><span class="k">Quote discount (' + m.qDisc + '%)</span>' +
-              '<span class="v">&minus;' + money(m.discAmt) + '</span></div>';
-    }
-    if (m.ship > 0) {
-      rows += '<div class="row"><span class="k">Shipping</span><span class="v">' + money(m.ship) + '</span></div>';
-    }
-    if (m.taxPct > 0) {
-      rows += '<div class="row"><span class="k">Tax (' + m.taxPct + '%)</span><span class="v">' + money(m.tax) + '</span></div>';
-    }
-    rows += '<div class="row grand"><span class="k">Total</span><span class="v">' + money(m.total) + '</span></div>';
-    document.getElementById('totals').innerHTML = rows;
-
+    renderTotalsInto(document.getElementById('totals'), m);
     updateTray();
   }
 
@@ -1176,9 +1220,38 @@ footer span { color: var(--red); }
     if (f === 'qty') {
       state.sel[id].qty = Math.max(1, parseInt(e.target.value, 10) || 1);
     } else {
-      state.sel[id].disc = Math.min(100, Math.max(0, parseFloat(e.target.value) || 0));
+      var d = Math.max(0, parseFloat(e.target.value) || 0);
+      state.sel[id].disc = state.sel[id].discMode === 'amt' ? d : Math.min(100, d);
     }
     saveSelection();
+    refreshTotalsOnly();
+  });
+
+  document.getElementById('lines-body').addEventListener('click', function (e) {
+    if (!e.target.matches('[data-f="discmode"]')) return;
+    var id = e.target.closest('tr').dataset.id;
+    var sel = state.sel[id];
+    if (!sel) return;
+    // Switching units keeps the number the user typed rather than converting it
+    // -- converting silently would change the quoted price without them asking.
+    sel.discMode = sel.discMode === 'amt' ? 'pct' : 'amt';
+    if (sel.discMode === 'pct') sel.disc = Math.min(100, sel.disc);
+    saveSelection();
+    renderLines();
+  });
+
+  document.getElementById('q-discount-mode').addEventListener('click', function () {
+    state.qDiscMode = state.qDiscMode === 'amt' ? 'pct' : 'amt';
+    var btn = document.getElementById('q-discount-mode');
+    var input = document.getElementById('q-discount');
+    btn.textContent = state.qDiscMode === 'amt' ? '$' : '%';
+    btn.classList.toggle('amt', state.qDiscMode === 'amt');
+    if (state.qDiscMode === 'pct') {
+      input.max = '100';
+      if ((parseFloat(input.value) || 0) > 100) input.value = '100';
+    } else {
+      input.removeAttribute('max');
+    }
     refreshTotalsOnly();
   });
 
@@ -1209,8 +1282,9 @@ footer span { color: var(--red); }
 
   function renderTotalsInto(host, m) {
     var rows = '<div class="row"><span class="k">Subtotal</span><span class="v">' + money(m.subtotal) + '</span></div>';
-    if (m.qDisc > 0) {
-      rows += '<div class="row discount"><span class="k">Quote discount (' + m.qDisc + '%)</span>' +
+    if (m.discAmt > 0) {
+      rows += '<div class="row discount"><span class="k">Quote discount' +
+              (m.qDiscMode === 'pct' ? ' (' + m.qDisc + '%)' : '') + '</span>' +
               '<span class="v">&minus;' + money(m.discAmt) + '</span></div>';
     }
     if (m.ship > 0) rows += '<div class="row"><span class="k">Shipping</span><span class="v">' + money(m.ship) + '</span></div>';
@@ -1302,14 +1376,16 @@ footer span { color: var(--red); }
           '<td class="c"><span class="gtag">' + esc(l.item.gens.map(genShort).join(' / ')) + '</span></td>' +
           '<td class="c">' + l.qty + '</td>' +
           '<td class="n">' + money(l.unit) + '</td>' +
-          '<td class="c">' + (l.disc > 0 ? l.disc + '%' : '—') + '</td>' +
+          '<td class="c">' + (discountLabel(l.disc, l.discMode) || '—') + '</td>' +
           '<td class="n b">' + money(l.ext) + '</td>' +
         '</tr>';
     }).join('');
 
     var totalRows = '<tr><td>Subtotal</td><td class="n">' + money(m.subtotal) + '</td></tr>';
-    if (m.qDisc > 0) {
-      totalRows += '<tr class="disc"><td>Quote discount (' + m.qDisc + '%)</td><td class="n">&minus;' + money(m.discAmt) + '</td></tr>';
+    if (m.discAmt > 0) {
+      totalRows += '<tr class="disc"><td>Quote discount' +
+        (m.qDiscMode === 'pct' ? ' (' + m.qDisc + '%)' : '') +
+        '</td><td class="n">&minus;' + money(m.discAmt) + '</td></tr>';
     }
     if (m.ship > 0) totalRows += '<tr><td>Shipping &amp; handling</td><td class="n">' + money(m.ship) + '</td></tr>';
     if (m.taxPct > 0) totalRows += '<tr><td>Tax (' + m.taxPct + '%)</td><td class="n">' + money(m.tax) + '</td></tr>';
