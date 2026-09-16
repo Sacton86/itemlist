@@ -11,8 +11,8 @@
  */
 
 // ---- fill these in before deploying --------------------------------------
-var SHEET_ID = 'PASTE_QUOTES_LOG_SPREADSHEET_ID_HERE';
-var SIGNED_FOLDER_ID = 'PASTE_SIGNED_QUOTES_DRIVE_FOLDER_ID_HERE';
+var SHEET_ID = '1_S98X5Pkcu2GFlW8T5q3y1BF8RFdLzOv2_hU97IQVgE';
+var SIGNED_FOLDER_ID = '1PG4sqUJiSmHE0WjHfyRNK_Kq5DM0VtGz';
 var ACCOUNTING_EMAIL = 'accounting@impactledsigns.com';
 // ----------------------------------------------------------------------------
 
@@ -67,6 +67,10 @@ function doGet(e) {
   tmpl.token = token;
   tmpl.quoteHtml = record.html;
   tmpl.number = record.number;
+  // Signing.html renders inside a *.googleusercontent.com sandbox iframe, so
+  // window.location.href there is NOT this web app's URL -- pass the real
+  // one down explicitly for the client to POST back to.
+  tmpl.webAppUrl = ScriptApp.getService().getUrl();
   return tmpl.evaluate()
     .setTitle('Approve Quote ' + record.number)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1.0');
@@ -203,7 +207,10 @@ function htmlToPdf_(html, filenameBase) {
     mimeType: MimeType.GOOGLE_DOCS,
     parents: [SIGNED_FOLDER_ID]
   };
-  var doc = Drive.Files.create(fileMetadata, htmlBlob);
+  // supportsAllDrives is required for the Advanced Drive Service (v3 REST
+  // API) to see/write items in a Shared Drive -- without it, a Shared Drive
+  // folder ID comes back as "File not found" even with full access to it.
+  var doc = Drive.Files.create(fileMetadata, htmlBlob, { supportsAllDrives: true });
   var pdfBlob = DriveApp.getFileById(doc.id).getAs(MimeType.PDF).setName(filenameBase + '.pdf');
   var pdfFile = DriveApp.getFolderById(SIGNED_FOLDER_ID).createFile(pdfBlob);
   DriveApp.getFileById(doc.id).setTrashed(true);

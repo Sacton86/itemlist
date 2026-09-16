@@ -64,6 +64,7 @@
 
 <script>
   var token = <?!= JSON.stringify(token) ?>;
+  var webAppUrl = <?!= JSON.stringify(webAppUrl) ?>;
   var canvas = document.getElementById('pad');
   var ctx = canvas.getContext('2d');
   ctx.lineWidth = 2;
@@ -111,7 +112,7 @@
     msg.style.color = '#444';
     msg.textContent = 'Submitting…';
 
-    fetch(window.location.href.split('?')[0], {
+    fetch(webAppUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({
