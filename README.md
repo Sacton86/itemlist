@@ -13,8 +13,11 @@ install, no server, no internet needed once loaded.
 - Search by part number or description; filter by generation, category, or missing photo.
 - Click any product photo to view it full-screen and copy or save it.
 - Set a quantity, hit **Add**, then **Create Quote**.
-- Pick **Dealer** or **End User** pricing, fill in the customer details, and
-  **Preview Quote** → Print / Save as PDF.
+- Pick **Dealer** or **End User** pricing, fill in the customer details, and either
+  **Preview Quote** → Print / Save as PDF yourself, or **Send to Client for Approval**
+  to email them a link where they can review the quote and sign off on it electronically.
+  Once they approve, the preparer and accounting get an email with the signed PDF
+  attached. See `google-apps-script/README.md` for how that backend is set up.
 
 Discounts work per line and on the whole quote. Each one has a **% / $** button —
 click it to switch between a percentage and a flat dollar amount. A dollar discount
@@ -56,6 +59,7 @@ Then commit and push to update the live site.
 | `MISSING-IMAGES.md` | Checklist of parts with no photo. Generated. |
 | `images/` | Product photos. |
 | `style template.html` | The original SOP document the visual style came from. |
+| `google-apps-script/` | Backend for the client e-signature / approval-notification flow. |
 
 ## Notes on the data
 

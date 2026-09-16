@@ -660,7 +660,10 @@ footer span { color: var(--red); }
             <div class="field"><label>Date</label><input id="q-date" type="date" /></div>
             <div class="field"><label>Valid Until</label><input id="q-valid" type="date" /></div>
           </div>
-          <div class="field"><label>Prepared By</label><input id="q-preparer" placeholder="Your name" /></div>
+          <div class="field-2">
+            <div class="field"><label>Prepared By</label><input id="q-preparer" placeholder="Your name" /></div>
+            <div class="field"><label>Preparer Email</label><input id="q-preparer-email" type="email" placeholder="you@impactledsigns.com" /></div>
+          </div>
         </div>
 
         <div class="field-group">
@@ -710,6 +713,7 @@ footer span { color: var(--red); }
     <div class="modal-footer">
       <span class="msg" id="modal-msg"></span>
       <button class="btn-ghost" id="btn-back">Back to Catalog</button>
+      <button class="btn-ghost" id="btn-send-client">Send to Client for Approval</button>
       <button class="btn-primary" id="btn-preview">Preview Quote &rarr;</button>
     </div>
   </div>
@@ -743,9 +747,16 @@ footer span { color: var(--red); }
   var BY_ID = {};
   ITEMS.forEach(function (it) { BY_ID[it.id] = it; });
 
-  var LS_SEL   = 'impact.quote.selection';
-  var LS_PREP  = 'impact.quote.preparer';
-  var LS_SEQ   = 'impact.quote.seq';
+  var LS_SEL        = 'impact.quote.selection';
+  var LS_PREP       = 'impact.quote.preparer';
+  var LS_PREP_EMAIL = 'impact.quote.preparerEmail';
+  var LS_SEQ        = 'impact.quote.seq';
+
+  // Google Apps Script Web App endpoint that emails the client a signing link
+  // and, once they approve, emails the signed PDF back internally. Deploy the
+  // project in google-apps-script/ (see google-apps-script/README.md) and
+  // paste the resulting /exec URL here.
+  var APPS_SCRIPT_URL = '';
 
   var DEFAULT_TERMS =
     'Pricing is valid through the date shown above and is subject to change thereafter. ' +
@@ -1142,6 +1153,8 @@ footer span { color: var(--red); }
     try {
       var prep = localStorage.getItem(LS_PREP);
       if (prep) document.getElementById('q-preparer').value = prep;
+      var prepEmail = localStorage.getItem(LS_PREP_EMAIL);
+      if (prepEmail) document.getElementById('q-preparer-email').value = prepEmail;
     } catch (e) {}
 
     document.querySelector('input[name="basis"][value="' + state.basis + '"]').checked = true;
@@ -1307,6 +1320,9 @@ footer span { color: var(--red); }
   document.getElementById('q-preparer').addEventListener('change', function (e) {
     try { localStorage.setItem(LS_PREP, e.target.value); } catch (err) {}
   });
+  document.getElementById('q-preparer-email').addEventListener('change', function (e) {
+    try { localStorage.setItem(LS_PREP_EMAIL, e.target.value); } catch (err) {}
+  });
 
   document.getElementById('btn-quote').addEventListener('click', openModal);
   document.getElementById('modal-close').addEventListener('click', closeModal);
@@ -1340,6 +1356,78 @@ footer span { color: var(--red); }
     win.document.write(buildQuoteDoc());
     win.document.close();
     bumpQuoteSeq();
+  });
+
+  document.getElementById('btn-send-client').addEventListener('click', function () {
+    var msg = document.getElementById('modal-msg');
+    var company       = document.getElementById('q-company').value.trim();
+    var contact       = document.getElementById('q-contact').value.trim();
+    var email         = document.getElementById('q-email').value.trim();
+    var preparer      = document.getElementById('q-preparer').value.trim();
+    var preparerEmail = document.getElementById('q-preparer-email').value.trim();
+
+    if (!company && !contact) {
+      msg.textContent = 'Enter a customer or company name first.';
+      document.getElementById('q-company').focus();
+      return;
+    }
+    if (!email) {
+      msg.textContent = "Enter the client's email address first.";
+      document.getElementById('q-email').focus();
+      return;
+    }
+    if (!preparer || !preparerEmail) {
+      msg.textContent = 'Enter your name and email under Prepared By first.';
+      document.getElementById(preparer ? 'q-preparer-email' : 'q-preparer').focus();
+      return;
+    }
+    if (!APPS_SCRIPT_URL) {
+      msg.textContent = "The approval service isn't configured yet (APPS_SCRIPT_URL is empty).";
+      return;
+    }
+
+    var m = quoteMath();
+    var payload = {
+      action: 'create',
+      number: document.getElementById('q-number').value.trim(),
+      company: company,
+      contact: contact,
+      email: email,
+      phone: document.getElementById('q-phone').value.trim(),
+      date: document.getElementById('q-date').value,
+      validUntil: document.getElementById('q-valid').value,
+      preparer: preparer,
+      preparerEmail: preparerEmail,
+      total: m.total,
+      html: buildQuoteDoc()
+    };
+
+    var btn = document.getElementById('btn-send-client');
+    btn.disabled = true;
+    msg.textContent = 'Sending to client…';
+
+    // Content-Type: text/plain keeps this a CORS "simple request" (no
+    // preflight OPTIONS), which is what makes cross-origin fetches to an
+    // Apps Script Web App work. The Apps Script side still parses the body
+    // as JSON regardless of the declared content type.
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data && data.ok) {
+          msg.textContent = 'Sent — ' + email + ' will get a link to review and approve.';
+          bumpQuoteSeq();
+        } else {
+          msg.textContent = (data && data.error) || 'Something went wrong sending the quote.';
+        }
+      })
+      .catch(function () {
+        msg.textContent = 'Could not reach the approval service. Check your connection and try again.';
+      })
+      .finally(function () { btn.disabled = false; });
   });
 
   function fmtDate(iso) {

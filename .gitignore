@@ -7,3 +7,6 @@ build/.pricelist-cache.xlsx
 __pycache__/
 *.pyc
 .DS_Store
+
+# Apps Script CLI project pointer (contains a per-developer scriptId, not code).
+google-apps-script/.clasp.json
