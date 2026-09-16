@@ -65,6 +65,7 @@ PART_IMAGE_MAP = {
     "REC-i5A": "REC - I5A.png",
     "REC-i5+": "REC - i5+.png",
     "WIFI-Ubiquity Radio": "WIFI - NANOSTATIONM2.png",
+    "L-D-1-16-R-20x20": "MODULE - G1 16mm RGB.png",
 }
 
 # Image files in images/ that are deliberately NOT mapped: they show obsolete
@@ -78,6 +79,7 @@ IGNORED_IMAGES = {
     "SEND - MSD300.png":       "obsolete, Sheet7 only",
     "CONTROLLER - PSD100.png": "obsolete, Sheet7 only",
     "CONTROLLER - IFC6309.png": "obsolete, Sheet7 only",
+    "MODULE - G1 16mm RGB (rear).png": "rear view of L-D-1-16-R-20x20; catalog only shows one photo per part",
 }
 
 # ---------------------------------------------------------------------------
