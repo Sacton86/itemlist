@@ -1178,15 +1178,17 @@ footer span { color: var(--red); }
         ext: applyDiscount(unit * l.qty, l.disc, l.discMode)
       };
     });
-    var subtotal = lines.reduce(function (a, l) { return a + l.ext; }, 0);
+    var gross = lines.reduce(function (a, l) { return a + l.gross; }, 0);
+    var netOfLineDisc = lines.reduce(function (a, l) { return a + l.ext; }, 0);
+    var lineDiscAmt = gross - netOfLineDisc;
     var qDisc  = Math.max(0, parseFloat(document.getElementById('q-discount').value) || 0);
     var taxPct = Math.max(0, parseFloat(document.getElementById('q-tax').value) || 0);
     var ship   = Math.max(0, parseFloat(document.getElementById('q-shipping').value) || 0);
-    var afterDisc = applyDiscount(subtotal, qDisc, state.qDiscMode);
-    var discAmt = subtotal - afterDisc;
+    var afterDisc = applyDiscount(netOfLineDisc, qDisc, state.qDiscMode);
+    var discAmt = netOfLineDisc - afterDisc;
     var tax = (afterDisc + ship) * (taxPct / 100);
     return {
-      lines: lines, subtotal: subtotal,
+      lines: lines, subtotal: gross, lineDiscAmt: lineDiscAmt,
       qDisc: qDisc, qDiscMode: state.qDiscMode, discAmt: discAmt,
       taxPct: taxPct, tax: tax, ship: ship, total: afterDisc + ship + tax
     };
@@ -1295,6 +1297,10 @@ footer span { color: var(--red); }
 
   function renderTotalsInto(host, m) {
     var rows = '<div class="row"><span class="k">Subtotal</span><span class="v">' + money(m.subtotal) + '</span></div>';
+    if (m.lineDiscAmt > 0) {
+      rows += '<div class="row discount"><span class="k">Line item discounts</span>' +
+              '<span class="v">&minus;' + money(m.lineDiscAmt) + '</span></div>';
+    }
     if (m.discAmt > 0) {
       rows += '<div class="row discount"><span class="k">Quote discount' +
               (m.qDiscMode === 'pct' ? ' (' + m.qDisc + '%)' : '') + '</span>' +
@@ -1470,6 +1476,9 @@ footer span { color: var(--red); }
     }).join('');
 
     var totalRows = '<tr><td>Subtotal</td><td class="n">' + money(m.subtotal) + '</td></tr>';
+    if (m.lineDiscAmt > 0) {
+      totalRows += '<tr class="disc"><td>Line item discounts</td><td class="n">&minus;' + money(m.lineDiscAmt) + '</td></tr>';
+    }
     if (m.discAmt > 0) {
       totalRows += '<tr class="disc"><td>Quote discount' +
         (m.qDiscMode === 'pct' ? ' (' + m.qDisc + '%)' : '') +
