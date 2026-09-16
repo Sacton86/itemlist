@@ -23,7 +23,7 @@ var HEADERS = [
   'company', 'contact', 'email', 'phone',
   'number', 'date', 'validUntil',
   'preparer', 'preparerEmail', 'total',
-  'html', 'pdfUrl'
+  'html', 'pdfUrl', 'dataJson'
 ];
 
 // ---------------------------------------------------------------- entry points
@@ -37,6 +37,7 @@ function doPost(e) {
   }
   if (body.action === 'create') return handleCreate_(body);
   if (body.action === 'sign') return handleSign_(body);
+  if (body.action === 'status') return handleStatus_(body);
   return jsonOut_({ ok: false, error: 'Unknown action.' });
 }
 
@@ -84,12 +85,17 @@ function handleCreate_(body) {
   }
 
   var token = Utilities.getUuid();
+  var dataJson = JSON.stringify({
+    lines: body.lines || [],
+    totals: body.totals || {},
+    terms: body.terms || ''
+  });
   getSheet_().appendRow([
     token, 'sent', new Date().toISOString(), '',
     body.company || '', body.contact || '', body.email || '', body.phone || '',
     body.number || '', body.date || '', body.validUntil || '',
     body.preparer || '', body.preparerEmail || '', body.total || 0,
-    body.html || '', ''
+    body.html || '', '', dataJson
   ]);
 
   var signUrl = ScriptApp.getService().getUrl() + '?token=' + encodeURIComponent(token);
@@ -129,23 +135,48 @@ function handleSign_(body) {
 
   var signedAt = new Date();
   var pngBase64 = String(body.signaturePng).split(',').pop();
-  var signatureBlob = Utilities.newBlob(Utilities.base64Decode(pngBase64), 'image/png', 'signature.png');
 
-  var signedHtml = injectSignature_(record.html, {
+  // Build a separate, simplified template for the PDF from the structured
+  // line-item/totals data (not record.html) -- Google's HTML-to-PDF
+  // conversion doesn't preserve the on-screen quote's richer CSS well, so
+  // this uses plain tables/inline colors that survive that conversion, in
+  // the same Impact LED branding. The on-screen quote and signing page are
+  // unaffected -- they still use record.html directly.
+  var pdfHtml = buildPdfHtml_(record, {
     name: body.signerName || record.contact,
-    dateStr: signedAt.toLocaleString()
-  }, signatureBlob);
+    dateStr: signedAt.toLocaleString(),
+    dataUri: 'data:image/png;base64,' + pngBase64
+  });
 
   var safeNumber = String(record.number || 'quote').replace(/[^A-Za-z0-9\-_. ]/g, '');
-  var pdf = htmlToPdf_(signedHtml, 'Quote ' + safeNumber + ' - Signed');
+  var pdf = htmlToPdf_(pdfHtml, 'Quote ' + safeNumber + ' - Signed');
 
   sheet.getRange(rowIdx, HEADERS.indexOf('status') + 1).setValue('signed');
   sheet.getRange(rowIdx, HEADERS.indexOf('signedAt') + 1).setValue(signedAt.toISOString());
   sheet.getRange(rowIdx, HEADERS.indexOf('pdfUrl') + 1).setValue(pdf.url);
 
-  notifyApproval_(record, pdf.blob, signedAt, body.signerName);
+  // The quote is already recorded as signed at this point (PDF exists) --
+  // a failure sending the internal notification shouldn't make this whole
+  // request look like the client's approval never went through. Log it
+  // instead (Apps Script editor > Executions) so it can be noticed and the
+  // notification resent by hand if it ever fails.
+  try {
+    notifyApproval_(record, pdf.blob, signedAt, body.signerName);
+  } catch (notifyErr) {
+    Logger.log('notifyApproval_ failed for token ' + body.token + ': ' + notifyErr);
+  }
 
   return jsonOut_({ ok: true });
+}
+
+// Lets the signing page double-check what actually happened when its own
+// submit request's response failed to load (a known Apps Script redirect
+// quirk) without risking a duplicate submission.
+function handleStatus_(body) {
+  var rowIdx = findRowIndex_(body.token);
+  if (!rowIdx) return jsonOut_({ ok: false, error: 'Quote not found.' });
+  var record = rowToRecord_(getSheet_().getRange(rowIdx, 1, 1, HEADERS.length).getValues()[0]);
+  return jsonOut_({ ok: true, status: record.status });
 }
 
 function notifyApproval_(record, pdfBlob, signedAt, signerName) {
@@ -177,24 +208,172 @@ function row_(label, value) {
   return '<tr><td style="color:#888;">' + esc_(label) + '</td><td>' + esc_(value) + '</td></tr>';
 }
 
-// ---------------------------------------------------------------- PDF / signature
+// ---------------------------------------------------------------- PDF template
 
-function injectSignature_(html, info, signatureBlob) {
-  var dataUri = 'data:image/png;base64,' + Utilities.base64Encode(signatureBlob.getBytes());
-  var block =
-    '<div style="margin:26px 26px 30px;padding:18px 22px;border:1px solid #e2e2e2;' +
-    'border-radius:10px;background:#fff;">' +
-      '<div style="font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;' +
-      'color:#cc1111;margin-bottom:8px;">Approved &amp; Signed</div>' +
-      '<img src="' + dataUri + '" alt="Signature" style="max-width:280px;max-height:90px;' +
-      'display:block;margin-bottom:8px;" />' +
-      '<div style="font-size:.85rem;color:#444;">' + esc_(info.name) + ' &middot; ' +
-      esc_(info.dateStr) + '</div>' +
-    '</div>';
+// A deliberately simple, table-based HTML document for the emailed/signed
+// PDF -- built from the structured line-item/totals data captured at
+// "create" time (record.dataJson), not from record.html. Google's HTML
+// import (used by htmlToPdf_ below) doesn't handle gradients, flexbox, or
+// @import web fonts, all of which the on-screen quote uses; this template
+// sticks to plain tables and inline colors, which it renders reliably,
+// while keeping the same Impact LED red/black branding and layout shape.
+function buildPdfHtml_(record, signature) {
+  var data = {};
+  try { data = JSON.parse(record.dataJson || '{}'); } catch (e) {}
+  var lines = data.lines || [];
+  var totals = data.totals || {};
+  var terms = data.terms || '';
+  var logoUrl = 'https://sacton86.github.io/itemlist/Impact%20Logo.png';
 
-  var idx = html.lastIndexOf('</body>');
-  if (idx === -1) return html + block;
-  return html.slice(0, idx) + block + html.slice(idx);
+  var rows = lines.map(function (l) {
+    return '' +
+      '<tr>' +
+        '<td style="padding:8px 10px;border:1px solid #ccc;">' +
+          '<div style="font-weight:bold;color:#0a0a0a;">' + esc_(l.part) + '</div>' +
+          (l.desc ? '<div style="font-size:10px;color:#888888;">' + esc_(l.desc) + '</div>' : '') +
+        '</td>' +
+        '<td style="padding:8px 10px;border:1px solid #ccc;text-align:center;font-size:10px;color:#888888;">' + esc_(l.gens) + '</td>' +
+        '<td style="padding:8px 10px;border:1px solid #ccc;text-align:center;">' + l.qty + '</td>' +
+        '<td style="padding:8px 10px;border:1px solid #ccc;text-align:right;">' + moneyFmt_(l.unit) + '</td>' +
+        '<td style="padding:8px 10px;border:1px solid #ccc;text-align:center;">' + esc_(l.discLabel) + '</td>' +
+        '<td style="padding:8px 10px;border:1px solid #ccc;text-align:right;font-weight:bold;">' + moneyFmt_(l.ext) + '</td>' +
+      '</tr>';
+  }).join('');
+
+  var totalRows = totalsRow_('Subtotal', moneyFmt_(totals.subtotal), '#888888');
+  if (totals.lineDiscAmt > 0) {
+    totalRows += totalsRow_('Line item discounts', '−' + moneyFmt_(totals.lineDiscAmt), '#cc1111');
+  }
+  if (totals.discAmt > 0) {
+    totalRows += totalsRow_(
+      'Quote discount' + (totals.qDiscMode === 'pct' ? ' (' + totals.qDisc + '%)' : ''),
+      '−' + moneyFmt_(totals.discAmt), '#cc1111'
+    );
+  }
+  if (totals.ship > 0) totalRows += totalsRow_('Shipping', moneyFmt_(totals.ship), '#888888');
+  if (totals.taxPct > 0) totalRows += totalsRow_('Tax (' + totals.taxPct + '%)', moneyFmt_(totals.tax), '#888888');
+  totalRows +=
+    '<tr>' +
+      '<td style="padding:10px;background-color:#0a0a0a;color:#ffffff;font-weight:bold;font-size:11px;text-transform:uppercase;">Total</td>' +
+      '<td style="padding:10px;background-color:#0a0a0a;color:#ffffff;font-weight:bold;text-align:right;font-size:14px;">' + moneyFmt_(totals.total) + '</td>' +
+    '</tr>';
+
+  var sigBlock = '';
+  if (signature) {
+    sigBlock =
+      '<table style="width:100%;border-collapse:collapse;margin-top:20px;">' +
+        '<tr><td style="padding:14px 16px;border:1px solid #e2e2e2;background-color:#ffffff;">' +
+          '<div style="font-size:9px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#cc1111;margin-bottom:6px;">Approved &amp; Signed</div>' +
+          '<img src="' + signature.dataUri + '" width="200" alt="Signature" /><br/>' +
+          '<div style="font-size:11px;color:#444444;margin-top:4px;">' + esc_(signature.name) + ' &middot; ' + esc_(signature.dateStr) + '</div>' +
+        '</td></tr>' +
+      '</table>';
+  }
+
+  return '' +
+'<html><head><meta charset="UTF-8" /></head>' +
+'<body style="font-family:Arial,Helvetica,sans-serif;color:#444444;margin:0;padding:0;">' +
+
+'<table style="width:100%;border-collapse:collapse;background-color:#0a0a0a;">' +
+  '<tr>' +
+    '<td style="padding:12px 16px;"><img src="' + logoUrl + '" width="130" alt="Impact LED Signs" /></td>' +
+    '<td style="padding:12px 16px;text-align:right;">' +
+      '<span style="background-color:#cc1111;color:#ffffff;font-size:10px;font-weight:bold;letter-spacing:1px;padding:4px 10px;">QUOTATION</span>' +
+    '</td>' +
+  '</tr>' +
+'</table>' +
+
+'<table style="width:100%;border-collapse:collapse;border-bottom:3px solid #cc1111;">' +
+  '<tr>' +
+    '<td style="padding:14px 16px;">' +
+      '<div style="font-size:9px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#cc1111;">Quote Number</div>' +
+      '<div style="font-size:16px;font-weight:bold;color:#0a0a0a;">' + esc_(record.number) + '</div>' +
+    '</td>' +
+    '<td style="padding:14px 16px;text-align:right;font-size:10px;color:#888888;">' +
+      'Date: <strong style="color:#0a0a0a;">' + esc_(fmtDate_(record.date)) + '</strong><br/>' +
+      'Valid Until: <strong style="color:#0a0a0a;">' + esc_(fmtDate_(record.validUntil)) + '</strong>' +
+    '</td>' +
+  '</tr>' +
+'</table>' +
+
+'<table style="width:100%;border-collapse:collapse;margin-top:10px;">' +
+  '<tr>' +
+    '<td style="width:50%;padding:6px 16px;vertical-align:top;">' +
+      '<div style="font-size:9px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#cc1111;">Prepared For</div>' +
+      '<div style="font-size:12px;font-weight:bold;color:#0a0a0a;">' + esc_(record.company || record.contact || '—') + '</div>' +
+      (record.company && record.contact ? '<div style="font-size:11px;color:#888888;">' + esc_(record.contact) + '</div>' : '') +
+      (record.email ? '<div style="font-size:11px;color:#888888;">' + esc_(record.email) + '</div>' : '') +
+      (record.phone ? '<div style="font-size:11px;color:#888888;">' + esc_(record.phone) + '</div>' : '') +
+    '</td>' +
+    '<td style="width:50%;padding:6px 16px;vertical-align:top;">' +
+      '<div style="font-size:9px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#cc1111;">Prepared By</div>' +
+      '<div style="font-size:12px;font-weight:bold;color:#0a0a0a;">Impact LED Signs</div>' +
+      (record.preparer ? '<div style="font-size:11px;color:#888888;">' + esc_(record.preparer) + '</div>' : '') +
+    '</td>' +
+  '</tr>' +
+'</table>' +
+
+'<table style="width:100%;border-collapse:collapse;margin-top:16px;">' +
+  '<tr>' +
+    '<th style="padding:8px 10px;border:1px solid #ccc;background-color:#f4f4f4;text-align:left;font-size:10px;text-transform:uppercase;">Part / Description</th>' +
+    '<th style="padding:8px 10px;border:1px solid #ccc;background-color:#f4f4f4;font-size:10px;text-transform:uppercase;">Gen</th>' +
+    '<th style="padding:8px 10px;border:1px solid #ccc;background-color:#f4f4f4;font-size:10px;text-transform:uppercase;">Qty</th>' +
+    '<th style="padding:8px 10px;border:1px solid #ccc;background-color:#f4f4f4;font-size:10px;text-transform:uppercase;">Unit Price</th>' +
+    '<th style="padding:8px 10px;border:1px solid #ccc;background-color:#f4f4f4;font-size:10px;text-transform:uppercase;">Disc</th>' +
+    '<th style="padding:8px 10px;border:1px solid #ccc;background-color:#f4f4f4;font-size:10px;text-transform:uppercase;">Extended</th>' +
+  '</tr>' +
+  rows +
+'</table>' +
+
+'<table style="width:280px;border-collapse:collapse;margin:16px 0 0 auto;">' +
+  totalRows +
+'</table>' +
+
+(terms ?
+  '<table style="width:100%;border-collapse:collapse;margin-top:16px;">' +
+    '<tr><td style="padding:14px 16px;background-color:#e8f0fe;border-left:4px solid #1a56a0;">' +
+      '<div style="font-size:11px;font-weight:bold;color:#0f1f40;margin-bottom:4px;">Terms &amp; Notes</div>' +
+      '<div style="font-size:11px;color:#1a3060;">' + esc_(terms) + '</div>' +
+    '</td></tr>' +
+  '</table>'
+  : '') +
+
+sigBlock +
+
+'<table style="width:100%;border-collapse:collapse;background-color:#0a0a0a;margin-top:20px;">' +
+  '<tr><td style="padding:14px 16px;text-align:center;color:#888888;font-size:9px;">' +
+    'Impact LED Signs &nbsp;&middot;&nbsp; Quotation ' + esc_(record.number) + ' &nbsp;&middot;&nbsp; Valid until ' + esc_(fmtDate_(record.validUntil)) +
+  '</td></tr>' +
+'</table>' +
+
+'</body></html>';
+}
+
+function totalsRow_(label, value, color) {
+  return '<tr>' +
+    '<td style="padding:6px 10px;color:' + color + ';">' + esc_(label) + '</td>' +
+    '<td style="padding:6px 10px;text-align:right;color:' + color + ';">' + value + '</td>' +
+  '</tr>';
+}
+
+var MONTHS_ = ['January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'];
+
+// Google Sheets silently converts date-looking text (e.g. "2026-09-16")
+// into a real Date value when it's written to a cell -- so a value read
+// back from the sheet may be a Date object even though it started as a
+// plain ISO string on the way in. Handle both.
+function fmtDate_(value) {
+  if (!value) return '—';
+  var d;
+  if (Object.prototype.toString.call(value) === '[object Date]') {
+    d = value;
+  } else {
+    var p = String(value).split('-');
+    if (p.length !== 3) return String(value);
+    d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+  }
+  return MONTHS_[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
 }
 
 // Converts an HTML string to a PDF by importing it as a Google Doc (Drive

@@ -72,6 +72,15 @@
   ctx.strokeStyle = '#0a0a0a';
   var drawing = false, hasSignature = false, last = null;
 
+  // A transparent PNG background can render as solid black once Google's
+  // PDF conversion flattens it -- paint an explicit white background so the
+  // exported signature always has a clean, opaque backdrop.
+  function fillWhite() {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  fillWhite();
+
   function pos(e) {
     var r = canvas.getBoundingClientRect();
     var p = e.touches ? e.touches[0] : e;
@@ -97,7 +106,7 @@
   canvas.addEventListener('touchend', end);
 
   document.getElementById('clearBtn').addEventListener('click', function () {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    fillWhite();
     hasSignature = false;
   });
 
@@ -112,6 +121,16 @@
     msg.style.color = '#444';
     msg.textContent = 'Submitting…';
 
+    function showThankYou() {
+      document.querySelector('.sign-box').innerHTML =
+        '<h2>Thank you</h2><p>Your approval has been recorded and sent to our team.</p>';
+    }
+    function showError(text) {
+      msg.style.color = '#cc1111';
+      msg.textContent = text;
+      btn.disabled = false;
+    }
+
     fetch(webAppUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -124,19 +143,26 @@
     })
       .then(function (res) { return res.json(); })
       .then(function (data) {
-        if (data && data.ok) {
-          document.querySelector('.sign-box').innerHTML =
-            '<h2>Thank you</h2><p>Your approval has been recorded and sent to our team.</p>';
-        } else {
-          msg.style.color = '#cc1111';
-          msg.textContent = (data && data.error) || 'Something went wrong. Please try again.';
-          btn.disabled = false;
-        }
+        if (data && data.ok) showThankYou();
+        else showError((data && data.error) || 'Something went wrong. Please try again.');
       })
       .catch(function () {
-        msg.style.color = '#cc1111';
-        msg.textContent = 'Could not submit. Check your connection and try again.';
-        btn.disabled = false;
+        // The submit above may have actually gone through server-side even
+        // though fetching ITS response failed (a known Apps Script redirect
+        // quirk) -- check status directly before telling the client it failed.
+        fetch(webAppUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'status', token: token })
+        })
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            if (data && data.ok && data.status === 'signed') showThankYou();
+            else showError('Could not submit. Check your connection and try again.');
+          })
+          .catch(function () {
+            showError('Could not submit. Check your connection and try again.');
+          });
       });
   });
 </script>

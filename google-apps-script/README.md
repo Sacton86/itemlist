@@ -68,16 +68,20 @@ version: **Deploy → Manage deployments → edit (pencil) → New version → D
 
 ## How it works
 
-1. The quote page POSTs the rendered quote (same HTML `buildQuoteDoc()` generates for
-   Preview) plus company/contact/preparer fields to this Web App.
-2. `Code.gs` stores it in the "Quotes" sheet under a random token and emails the client
+1. The quote page POSTs two things to this Web App: the rendered quote HTML (same as
+   `buildQuoteDoc()` produces for Preview) for on-screen display, and the underlying
+   structured data (line items, totals, terms) for PDF generation.
+2. `Code.gs` stores both in the "Quotes" sheet under a random token and emails the client
    a link: `<web app url>?token=<uuid>`.
-3. `doGet` serves `Signing.html` for that token — an iframe of the exact quote plus a
-   signature pad.
-4. On approval, `Code.gs` embeds the signature image into the quote HTML, converts it to
-   a PDF (via a temporary Google Doc import → export), saves the PDF in the Drive folder,
-   and emails it to the preparer (cc: accounting) with the quote details laid out in the
-   email body.
+3. `doGet` serves `Signing.html` for that token — an iframe of the exact quote HTML plus
+   a signature pad. What the client sees is untouched by anything below.
+4. On approval, `Code.gs` builds a *separate*, simplified HTML document from the
+   structured data (`buildPdfHtml_`) — same Impact LED branding, but plain tables and
+   inline colors instead of the on-screen page's gradients/flexbox/web fonts, since
+   Google's HTML-to-PDF conversion (a temporary Google Doc import → export) doesn't
+   preserve those well. The signature gets embedded into that document, which is then
+   converted to PDF, saved to the Drive folder, and emailed to the preparer (cc:
+   accounting) with the quote details laid out in the email body.
 
 ## Security note
 

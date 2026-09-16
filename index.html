@@ -1405,7 +1405,35 @@ footer span { color: var(--red); }
       preparer: preparer,
       preparerEmail: preparerEmail,
       total: m.total,
-      html: buildQuoteDoc()
+      html: buildQuoteDoc(),
+      // Structured data alongside the rendered HTML above -- the backend
+      // uses this (not the HTML) to build a separate, simplified template
+      // for the emailed/signed PDF, since Google's HTML-to-PDF conversion
+      // doesn't preserve this page's richer CSS well. The on-screen quote
+      // and signing page still use the HTML above, unchanged.
+      lines: m.lines.map(function (l) {
+        return {
+          part: l.item.part,
+          desc: l.item.desc !== l.item.part ? l.item.desc : '',
+          gens: l.item.gens.map(genShort).join(' / '),
+          qty: l.qty,
+          unit: l.unit,
+          discLabel: discountLabel(l.disc, l.discMode) || '—',
+          ext: l.ext
+        };
+      }),
+      totals: {
+        subtotal: m.subtotal,
+        lineDiscAmt: m.lineDiscAmt,
+        qDisc: m.qDisc,
+        qDiscMode: m.qDiscMode,
+        discAmt: m.discAmt,
+        ship: m.ship,
+        taxPct: m.taxPct,
+        tax: m.tax,
+        total: m.total
+      },
+      terms: document.getElementById('q-terms').value.trim()
     };
 
     var btn = document.getElementById('btn-send-client');
