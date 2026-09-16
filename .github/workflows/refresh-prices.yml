@@ -1,0 +1,32 @@
+name: Refresh price list
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run refresh-prices.py
+        run: python3 build/refresh-prices.py
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet; then
+            echo "No price changes — nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html MISSING-IMAGES.md
+          git commit -m "Refresh price list from Google Sheet"
+          git push
