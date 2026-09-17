@@ -21,7 +21,7 @@ var SHEET_NAME = 'Quotes';
 var HEADERS = [
   'token', 'status', 'createdAt', 'signedAt',
   'company', 'contact', 'email', 'phone',
-  'number', 'date', 'validUntil',
+  'number', 'ticket', 'projectName', 'date', 'validUntil',
   'preparer', 'preparerEmail', 'total',
   'html', 'pdfUrl', 'dataJson'
 ];
@@ -93,7 +93,7 @@ function handleCreate_(body) {
   getSheet_().appendRow([
     token, 'sent', new Date().toISOString(), '',
     body.company || '', body.contact || '', body.email || '', body.phone || '',
-    body.number || '', body.date || '', body.validUntil || '',
+    body.number || '', body.ticket || '', body.projectName || '', body.date || '', body.validUntil || '',
     body.preparer || '', body.preparerEmail || '', body.total || 0,
     body.html || '', '', dataJson
   ]);
@@ -188,6 +188,8 @@ function notifyApproval_(record, pdfBlob, signedAt, signerName) {
       row_('Contact', record.contact) +
       row_('Client email', record.email) +
       row_('Phone', record.phone) +
+      row_('Ticket #', record.ticket) +
+      row_('Project', record.projectName) +
       row_('Quote date', record.date) +
       row_('Valid until', record.validUntil) +
       row_('Preparer', record.preparer) +
@@ -226,18 +228,19 @@ function buildPdfHtml_(record, signature) {
   var logoUrl = 'https://sacton86.github.io/itemlist/Impact%20Logo.png';
 
   var rows = lines.map(function (l) {
-    return '' +
-      '<tr>' +
-        '<td style="padding:8px 10px;border:1px solid #ccc;">' +
-          '<div style="font-weight:bold;color:#0a0a0a;">' + esc_(l.part) + '</div>' +
-          (l.desc ? '<div style="font-size:10px;color:#888888;">' + esc_(l.desc) + '</div>' : '') +
-        '</td>' +
-        '<td style="padding:8px 10px;border:1px solid #ccc;text-align:center;font-size:10px;color:#888888;">' + esc_(l.gens) + '</td>' +
-        '<td style="padding:8px 10px;border:1px solid #ccc;text-align:center;">' + l.qty + '</td>' +
-        '<td style="padding:8px 10px;border:1px solid #ccc;text-align:right;">' + moneyFmt_(l.unit) + '</td>' +
-        '<td style="padding:8px 10px;border:1px solid #ccc;text-align:center;">' + esc_(l.discLabel) + '</td>' +
-        '<td style="padding:8px 10px;border:1px solid #ccc;text-align:right;font-weight:bold;">' + moneyFmt_(l.ext) + '</td>' +
-      '</tr>';
+    // HYBRID items are split into an ITEM row (priced at cost) and a SERVICE
+    // row (the remainder of the sold amount) -- but only here, on the signed
+    // PDF. The quote the client reviews/signs shows the item as a single line.
+    if (l.type === 'HYBRID') {
+      var qty = Number(l.qty) || 0;
+      var costPerUnit = Number(l.cost) || 0;
+      var itemExt = Math.min(costPerUnit * qty, l.ext);
+      var serviceExt = l.ext - itemExt;
+      var serviceUnit = qty ? serviceExt / qty : serviceExt;
+      return lineRow_(l.part + ' (ITEM)', l.desc, l.gens, l.qty, costPerUnit, l.discLabel, itemExt) +
+             lineRow_(l.part + ' (SERVICE)', l.desc, l.gens, l.qty, serviceUnit, l.discLabel, serviceExt);
+    }
+    return lineRow_(l.part, l.desc, l.gens, l.qty, l.unit, l.discLabel, l.ext);
   }).join('');
 
   var totalRows = totalsRow_('Subtotal', moneyFmt_(totals.subtotal), '#888888');
@@ -251,7 +254,6 @@ function buildPdfHtml_(record, signature) {
     );
   }
   if (totals.ship > 0) totalRows += totalsRow_('Shipping', moneyFmt_(totals.ship), '#888888');
-  if (totals.taxPct > 0) totalRows += totalsRow_('Tax (' + totals.taxPct + '%)', moneyFmt_(totals.tax), '#888888');
   totalRows +=
     '<tr>' +
       '<td style="padding:10px;background-color:#0a0a0a;color:#ffffff;font-weight:bold;font-size:11px;text-transform:uppercase;">Total</td>' +
@@ -304,6 +306,8 @@ function buildPdfHtml_(record, signature) {
       (record.company && record.contact ? '<div style="font-size:11px;color:#888888;">' + esc_(record.contact) + '</div>' : '') +
       (record.email ? '<div style="font-size:11px;color:#888888;">' + esc_(record.email) + '</div>' : '') +
       (record.phone ? '<div style="font-size:11px;color:#888888;">' + esc_(record.phone) + '</div>' : '') +
+      (record.ticket ? '<div style="font-size:11px;color:#888888;">Ticket #: ' + esc_(record.ticket) + '</div>' : '') +
+      (record.projectName ? '<div style="font-size:11px;color:#888888;">Project: ' + esc_(record.projectName) + '</div>' : '') +
     '</td>' +
     '<td style="width:50%;padding:6px 16px;vertical-align:top;">' +
       '<div style="font-size:9px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#cc1111;">Prepared By</div>' +
@@ -329,6 +333,8 @@ function buildPdfHtml_(record, signature) {
   totalRows +
 '</table>' +
 
+'<p style="font-size:10px;color:#888888;text-align:right;margin:0 0 16px;">Any applicable taxes due will be charged and may not be reflected in the quoted price.</p>' +
+
 (terms ?
   '<table style="width:100%;border-collapse:collapse;margin-top:16px;">' +
     '<tr><td style="padding:14px 16px;background-color:#e8f0fe;border-left:4px solid #1a56a0;">' +
@@ -347,6 +353,21 @@ sigBlock +
 '</table>' +
 
 '</body></html>';
+}
+
+function lineRow_(part, desc, gens, qty, unit, discLabel, ext) {
+  return '' +
+    '<tr>' +
+      '<td style="padding:8px 10px;border:1px solid #ccc;">' +
+        '<div style="font-weight:bold;color:#0a0a0a;">' + esc_(part) + '</div>' +
+        (desc ? '<div style="font-size:10px;color:#888888;">' + esc_(desc) + '</div>' : '') +
+      '</td>' +
+      '<td style="padding:8px 10px;border:1px solid #ccc;text-align:center;font-size:10px;color:#888888;">' + esc_(gens) + '</td>' +
+      '<td style="padding:8px 10px;border:1px solid #ccc;text-align:center;">' + qty + '</td>' +
+      '<td style="padding:8px 10px;border:1px solid #ccc;text-align:right;">' + moneyFmt_(unit) + '</td>' +
+      '<td style="padding:8px 10px;border:1px solid #ccc;text-align:center;">' + esc_(discLabel) + '</td>' +
+      '<td style="padding:8px 10px;border:1px solid #ccc;text-align:right;font-weight:bold;">' + moneyFmt_(ext) + '</td>' +
+    '</tr>';
 }
 
 function totalsRow_(label, value, color) {

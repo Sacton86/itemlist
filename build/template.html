@@ -438,6 +438,13 @@ main {
 .field textarea { resize: vertical; min-height: 78px; line-height: 1.6; }
 .field-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
+.check-na {
+  display: flex; align-items: center; gap: 5px; margin-top: 5px;
+  font-size: 10.5px; font-weight: 500; color: var(--gray-500); cursor: pointer;
+}
+.check-na input { width: auto; margin: 0; cursor: pointer; }
+.field input:disabled { background: var(--gray-100); color: var(--gray-500); }
+
 .basis {
   display: grid; grid-template-columns: 1fr 1fr; gap: 9px;
 }
@@ -657,6 +664,18 @@ footer span { color: var(--red); }
           <h3>Quote Details</h3>
           <div class="field"><label>Quote Number</label><input id="q-number" /></div>
           <div class="field-2">
+            <div class="field">
+              <label>Ticket #</label>
+              <input id="q-ticket" placeholder="12345" />
+              <label class="check-na"><input type="checkbox" id="q-ticket-na" /> No Ticket #</label>
+            </div>
+            <div class="field">
+              <label>Project Name</label>
+              <input id="q-project" placeholder="Main St. sign" />
+              <label class="check-na"><input type="checkbox" id="q-project-na" /> No Project Name</label>
+            </div>
+          </div>
+          <div class="field-2">
             <div class="field"><label>Date</label><input id="q-date" type="date" /></div>
             <div class="field"><label>Valid Until</label><input id="q-valid" type="date" /></div>
           </div>
@@ -675,9 +694,8 @@ footer span { color: var(--red); }
                 <button type="button" class="mode-btn" id="q-discount-mode" title="Switch between percent and dollars">%</button>
               </div>
             </div>
-            <div class="field"><label>Tax Rate %</label><input id="q-tax" type="number" min="0" step="0.001" value="0" /></div>
+            <div class="field"><label>Shipping ($)</label><input id="q-shipping" type="number" min="0" step="0.01" value="0" /></div>
           </div>
-          <div class="field"><label>Shipping ($)</label><input id="q-shipping" type="number" min="0" step="0.01" value="0" /></div>
         </div>
 
         <div class="field-group" style="margin-bottom:0;">
@@ -1147,6 +1165,12 @@ footer span { color: var(--red); }
     document.getElementById('q-number').value = nextQuoteNumber();
     document.getElementById('q-date').value = isoDate(today);
     document.getElementById('q-valid').value = isoDate(valid);
+    document.getElementById('q-ticket').value = '';
+    document.getElementById('q-ticket').disabled = false;
+    document.getElementById('q-ticket-na').checked = false;
+    document.getElementById('q-project').value = '';
+    document.getElementById('q-project').disabled = false;
+    document.getElementById('q-project-na').checked = false;
     if (!document.getElementById('q-terms').value) {
       document.getElementById('q-terms').value = DEFAULT_TERMS;
     }
@@ -1182,15 +1206,13 @@ footer span { color: var(--red); }
     var netOfLineDisc = lines.reduce(function (a, l) { return a + l.ext; }, 0);
     var lineDiscAmt = gross - netOfLineDisc;
     var qDisc  = Math.max(0, parseFloat(document.getElementById('q-discount').value) || 0);
-    var taxPct = Math.max(0, parseFloat(document.getElementById('q-tax').value) || 0);
     var ship   = Math.max(0, parseFloat(document.getElementById('q-shipping').value) || 0);
     var afterDisc = applyDiscount(netOfLineDisc, qDisc, state.qDiscMode);
     var discAmt = netOfLineDisc - afterDisc;
-    var tax = (afterDisc + ship) * (taxPct / 100);
     return {
       lines: lines, subtotal: gross, lineDiscAmt: lineDiscAmt,
       qDisc: qDisc, qDiscMode: state.qDiscMode, discAmt: discAmt,
-      taxPct: taxPct, tax: tax, ship: ship, total: afterDisc + ship + tax
+      ship: ship, total: afterDisc + ship
     };
   }
 
@@ -1307,12 +1329,11 @@ footer span { color: var(--red); }
               '<span class="v">&minus;' + money(m.discAmt) + '</span></div>';
     }
     if (m.ship > 0) rows += '<div class="row"><span class="k">Shipping</span><span class="v">' + money(m.ship) + '</span></div>';
-    if (m.taxPct > 0) rows += '<div class="row"><span class="k">Tax (' + m.taxPct + '%)</span><span class="v">' + money(m.tax) + '</span></div>';
     rows += '<div class="row grand"><span class="k">Total</span><span class="v">' + money(m.total) + '</span></div>';
     host.innerHTML = rows;
   }
 
-  ['q-discount', 'q-tax', 'q-shipping'].forEach(function (id) {
+  ['q-discount', 'q-shipping'].forEach(function (id) {
     document.getElementById(id).addEventListener('input', refreshTotalsOnly);
   });
 
@@ -1322,6 +1343,16 @@ footer span { color: var(--red); }
       renderLines();
     });
   });
+
+  function wireNaCheckbox(checkboxId, inputId) {
+    document.getElementById(checkboxId).addEventListener('change', function (e) {
+      var input = document.getElementById(inputId);
+      input.disabled = e.target.checked;
+      if (e.target.checked) input.value = '';
+    });
+  }
+  wireNaCheckbox('q-ticket-na', 'q-ticket');
+  wireNaCheckbox('q-project-na', 'q-project');
 
   document.getElementById('q-preparer').addEventListener('change', function (e) {
     try { localStorage.setItem(LS_PREP, e.target.value); } catch (err) {}
@@ -1371,6 +1402,10 @@ footer span { color: var(--red); }
     var email         = document.getElementById('q-email').value.trim();
     var preparer      = document.getElementById('q-preparer').value.trim();
     var preparerEmail = document.getElementById('q-preparer-email').value.trim();
+    var ticket        = document.getElementById('q-ticket').value.trim();
+    var ticketNa      = document.getElementById('q-ticket-na').checked;
+    var project       = document.getElementById('q-project').value.trim();
+    var projectNa     = document.getElementById('q-project-na').checked;
 
     if (!company && !contact) {
       msg.textContent = 'Enter a customer or company name first.';
@@ -1387,6 +1422,16 @@ footer span { color: var(--red); }
       document.getElementById(preparer ? 'q-preparer-email' : 'q-preparer').focus();
       return;
     }
+    if (!ticket && !ticketNa) {
+      msg.textContent = "Enter a Ticket # or check \"No Ticket #\" first.";
+      document.getElementById('q-ticket').focus();
+      return;
+    }
+    if (!project && !projectNa) {
+      msg.textContent = "Enter a Project Name or check \"No Project Name\" first.";
+      document.getElementById('q-project').focus();
+      return;
+    }
     if (!APPS_SCRIPT_URL) {
       msg.textContent = "The approval service isn't configured yet (APPS_SCRIPT_URL is empty).";
       return;
@@ -1400,6 +1445,8 @@ footer span { color: var(--red); }
       contact: contact,
       email: email,
       phone: document.getElementById('q-phone').value.trim(),
+      ticket: ticket,
+      projectName: project,
       date: document.getElementById('q-date').value,
       validUntil: document.getElementById('q-valid').value,
       preparer: preparer,
@@ -1419,7 +1466,9 @@ footer span { color: var(--red); }
           qty: l.qty,
           unit: l.unit,
           discLabel: discountLabel(l.disc, l.discMode) || '—',
-          ext: l.ext
+          ext: l.ext,
+          type: l.item.type,
+          cost: l.item.cost
         };
       }),
       totals: {
@@ -1429,8 +1478,6 @@ footer span { color: var(--red); }
         qDiscMode: m.qDiscMode,
         discAmt: m.discAmt,
         ship: m.ship,
-        taxPct: m.taxPct,
-        tax: m.tax,
         total: m.total
       },
       terms: document.getElementById('q-terms').value.trim()
@@ -1481,6 +1528,8 @@ footer span { color: var(--red); }
     var email    = document.getElementById('q-email').value.trim();
     var phone    = document.getElementById('q-phone').value.trim();
     var number   = document.getElementById('q-number').value.trim();
+    var ticket   = document.getElementById('q-ticket').value.trim();
+    var project  = document.getElementById('q-project').value.trim();
     var qdate    = document.getElementById('q-date').value;
     var qvalid   = document.getElementById('q-valid').value;
     var preparer = document.getElementById('q-preparer').value.trim();
@@ -1513,7 +1562,6 @@ footer span { color: var(--red); }
         '</td><td class="n">&minus;' + money(m.discAmt) + '</td></tr>';
     }
     if (m.ship > 0) totalRows += '<tr><td>Shipping &amp; handling</td><td class="n">' + money(m.ship) + '</td></tr>';
-    if (m.taxPct > 0) totalRows += '<tr><td>Tax (' + m.taxPct + '%)</td><td class="n">' + money(m.tax) + '</td></tr>';
 
     var units = m.lines.reduce(function (a, l) { return a + l.qty; }, 0);
 
@@ -1571,6 +1619,7 @@ footer span { color: var(--red); }
 'table.totals tr.grand td:first-child{color:#999;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}' +
 'table.totals tr.grand td.n{color:var(--white);font-size:1.3rem;font-weight:700}' +
 '.callout{background:#e8f0fe;border-left:4px solid #1a56a0;border-radius:0 6px 6px 0;padding:14px 18px;margin:0 26px 24px;font-size:.85rem;color:#1a3060;page-break-inside:avoid}' +
+'.tax-note{font-size:.78rem;color:var(--gray-500);margin:0 26px 20px;text-align:right}' +
 '.callout strong{display:block;color:#0f1f40;margin-bottom:3px}' +
 'footer{background:var(--black);color:#555;text-align:center;padding:22px;font-size:.78rem}' +
 'footer span{color:var(--red)}' +
@@ -1594,6 +1643,8 @@ footer span { color: var(--red); }
   '<div class="docinfo-top">' +
     '<div class="qnum"><span class="kick">Quote Number</span><strong>' + esc(number) + '</strong></div>' +
     '<div class="dates">' +
+      (ticket ? '<div><strong>' + esc(ticket) + '</strong>Ticket #</div>' : '') +
+      (project ? '<div><strong>' + esc(project) + '</strong>Project Name</div>' : '') +
       '<div><strong>' + esc(fmtDate(qdate)) + '</strong>Quote Date</div>' +
       '<div><strong>' + esc(fmtDate(qvalid)) + '</strong>Valid Until</div>' +
       '<div><strong>' + m.lines.length + ' items / ' + units + ' units</strong>Quantity</div>' +
@@ -1624,6 +1675,7 @@ footer span { color: var(--red); }
     '<div class="totals-wrap"><table class="totals"><tbody>' + totalRows +
       '<tr class="grand"><td>Total</td><td class="n">' + money(m.total) + '</td></tr>' +
     '</tbody></table></div>' +
+    '<p class="tax-note">Any applicable taxes due will be charged and may not be reflected in the quoted price.</p>' +
     (terms ? '<div class="callout"><strong>Terms &amp; Notes</strong>' + esc(terms) + '</div>' : '') +
   '</div>' +
 '</main>' +

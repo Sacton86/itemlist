@@ -38,8 +38,40 @@ SHEET_URL = (
 # notably Sheet7, which is the obsolete-parts archive.
 SHEETS = ["G1", "G2", "G3", "G4", "G5", "Video Wall"]
 
-# Column positions in every sheet: Part Number | Part Description | Cost | Wholesale | MSRP
-COL_PART, COL_DESC, COL_COST, COL_WHOLESALE, COL_MSRP = 0, 1, 2, 3, 4
+# Part Number and Part Description are always the first two columns in every
+# sheet. Type/Cost/Wholesale/MSRP are resolved per sheet from the header row
+# (see sheet_price_columns) rather than hardcoded -- not every tab has been
+# updated with the newer Type column (e.g. Video Wall, as of 2026-09).
+COL_PART, COL_DESC = 0, 1
+
+ITEM_TYPES = {"ITEM", "SERVICE", "HYBRID"}
+
+
+def item_type(value):
+    """Normalize the Type column. Falls back to ITEM (processed like normal) on a
+    blank or unrecognized value, with a warning so a sheet typo doesn't silently
+    change how a line is billed."""
+    text = cell_text(value).strip().upper()
+    if text in ITEM_TYPES:
+        return text
+    if text:
+        print(f"  WARNING: unrecognized item type '{text}', defaulting to ITEM")
+    return "ITEM"
+
+
+def sheet_price_columns(header_row):
+    """Map 'type'/'cost'/'wholesale'/'msrp' to column index from a sheet's own
+    header row. 'type' may be absent on a tab that hasn't been updated yet --
+    that's fine, item_type(None) defaults such rows to ITEM."""
+    index = {}
+    for i, cell in enumerate(header_row):
+        name = cell_text(cell).strip().lower()
+        if name in ("type", "cost", "wholesale", "msrp"):
+            index[name] = i
+    missing = [name for name in ("cost", "wholesale", "msrp") if name not in index]
+    if missing:
+        raise SystemExit(f"ERROR: sheet header is missing column(s) {missing}: {header_row}")
+    return index
 
 # Sanity floor. The sheet has ~168 priced rows; a parse well below that means
 # the layout changed and we should not clobber a working index.html.
@@ -243,25 +275,31 @@ def build_items(sheets):
     less on G3/G4 than on G1/G2. Merging on (part, description) alone would put
     the G1 price on a G3 quote.
     """
-    grouped = OrderedDict()   # (part, desc) -> [ {gen, dealer, enduser}, ... ]
+    grouped = OrderedDict()   # (part, desc) -> [ {gen, dealer, enduser, cost, type}, ... ]
     row_count = 0
 
     for sheet_name in SHEETS:
         if sheet_name not in sheets:
             raise SystemExit(f"ERROR: expected sheet '{sheet_name}' is missing from the workbook.")
+        sheet_rows = sheets[sheet_name]
+        if not sheet_rows:
+            raise SystemExit(f"ERROR: sheet '{sheet_name}' has no rows.")
+        cols = sheet_price_columns(sheet_rows[0])
 
-        for row in sheets[sheet_name]:
+        for row in sheet_rows:
             part = cell_text(row[COL_PART] if len(row) > COL_PART else None)
             if not part or part.lower() == "part number":
                 continue
             row_count += 1
 
             desc = cell_text(row[COL_DESC] if len(row) > COL_DESC else None) or part
+            type_cell = row[cols["type"]] if "type" in cols and len(row) > cols["type"] else None
             grouped.setdefault((part, desc), []).append({
                 "gen": sheet_name,
-                # Cost (COL_COST) is deliberately never read -- it must not reach index.html.
-                "dealer": price(row[COL_WHOLESALE] if len(row) > COL_WHOLESALE else None),
-                "enduser": price(row[COL_MSRP] if len(row) > COL_MSRP else None),
+                "dealer": price(row[cols["wholesale"]] if len(row) > cols["wholesale"] else None),
+                "enduser": price(row[cols["msrp"]] if len(row) > cols["msrp"] else None),
+                "cost": price(row[cols["cost"]] if len(row) > cols["cost"] else None),
+                "type": item_type(type_cell),
             })
 
     items = []
@@ -269,28 +307,34 @@ def build_items(sheets):
         priced = [r for r in rows if r["dealer"] is not None or r["enduser"] is not None]
 
         # Split into one SKU per distinct price pair, preserving first-seen order.
+        # cost/type ride along with the variant's first-seen row -- they don't
+        # vary by generation the way dealer/enduser price can.
         variants = OrderedDict()
         for r in (priced or rows):
-            variants.setdefault((r["dealer"], r["enduser"]), [])
-            if r["gen"] not in variants[(r["dealer"], r["enduser"])]:
-                variants[(r["dealer"], r["enduser"])].append(r["gen"])
+            key = (r["dealer"], r["enduser"])
+            variants.setdefault(key, {"gens": [], "cost": r["cost"], "type": r["type"]})
+            if r["gen"] not in variants[key]["gens"]:
+                variants[key]["gens"].append(r["gen"])
 
         # A row with no price at all is a placeholder for the priced row of the
         # same part (e.g. HUB-A3-G4-VCAB is listed three times in Video Wall,
         # priced once). Fold its generation in -- but only when that is
         # unambiguous, i.e. there is exactly one priced variant.
         if priced and len(variants) == 1:
-            gens = next(iter(variants.values()))
+            gens = next(iter(variants.values()))["gens"]
             for r in rows:
                 if r["gen"] not in gens:
                     gens.append(r["gen"])
 
-        for (dealer, enduser), gens in variants.items():
+        for (dealer, enduser), variant in variants.items():
+            gens = variant["gens"]
             image = PART_IMAGE_MAP.get(part)
             items.append({
                 "id": slugify(f"{part}-{desc}") or slugify(part),
                 "part": part,
                 "desc": desc,
+                "type": variant["type"],
+                "cost": variant["cost"],
                 "gens": [g for g in SHEETS if g in gens],
                 "cat": categorize(part),
                 "dealer": dealer,
