@@ -1647,6 +1647,16 @@ footer span { color: var(--red); }
       document.getElementById('q-project').focus();
       return;
     }
+    var billing = readAddress('bill');
+    var BILL_REQUIRED = [['name', 'name'], ['line1', 'street address'], ['city', 'city'], ['state', 'state'], ['zip', 'ZIP']];
+    var missingBill = BILL_REQUIRED.filter(function (f) { return !billing[f[0]]; });
+    if (missingBill.length) {
+      var names = missingBill.map(function (f) { return f[1]; });
+      var list = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0];
+      msg.textContent = 'Enter the billing ' + list + ' first.';
+      document.getElementById('q-bill-' + missingBill[0][0]).focus();
+      return;
+    }
     if (!APPS_SCRIPT_URL) {
       msg.textContent = "The approval service isn't configured yet (APPS_SCRIPT_URL is empty).";
       return;
