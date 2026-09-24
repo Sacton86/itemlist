@@ -13,7 +13,9 @@ install, no server, no internet needed once loaded.
 - Search by part number or description; filter by generation, category, or missing photo.
 - Click any product photo to view it full-screen and copy or save it.
 - Set a quantity, hit **Add**, then **Create Quote**.
-- Pick **Dealer** or **End User** pricing, fill in the customer details, and either
+- Pick **Dealer** or **End User** pricing, fill in the customer details and billing
+  address (shipping defaults to **Same as billing**; pick **Different address** to enter
+  another), and either
   **Preview Quote** → Print / Save as PDF yourself, or **Send to Client for Approval**
   to email them a link where they can review the quote and sign off on it electronically.
   Once they approve, the preparer and accounting get an email with the signed PDF
@@ -44,10 +46,12 @@ Then commit and push to update the live site.
 ## Adding a product photo
 
 1. Drop the image in `images/`.
-2. Add a line to `PART_IMAGE_MAP` in `build/refresh-prices.py`.
+2. Add a line to `PART_IMAGE_MAP` in `build/refresh-prices.py`. For several photos of one
+   part, give a list — the first (e.g. `-front.png`) is the main photo; the rest are
+   reached with the left/right gallery arrows on the card and in the full-screen view.
 3. Re-run the script.
 
-`MISSING-IMAGES.md` tracks which parts still need a photo — 87 of 99 at present.
+`MISSING-IMAGES.md` tracks which parts still need a photo — 76 of 107 at present.
 
 ## Layout
 

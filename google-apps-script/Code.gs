@@ -88,7 +88,12 @@ function handleCreate_(body) {
   var dataJson = JSON.stringify({
     lines: body.lines || [],
     totals: body.totals || {},
-    terms: body.terms || ''
+    terms: body.terms || '',
+    // Addresses ride in dataJson rather than new sheet columns, so rows
+    // written before they existed still line up with HEADERS.
+    billing: body.billing || {},
+    shipping: body.shipping || {},
+    shipSameAsBilling: !!body.shipSameAsBilling
   });
   getSheet_().appendRow([
     token, 'sent', new Date().toISOString(), '',
@@ -180,6 +185,9 @@ function handleStatus_(body) {
 }
 
 function notifyApproval_(record, pdfBlob, signedAt, signerName) {
+  var data = {};
+  try { data = JSON.parse(record.dataJson || '{}'); } catch (e) {}
+  var shipTo = data.shipSameAsBilling ? 'Same as billing' : addressLines_(data.shipping).join(', ');
   var bodyHtml =
     '<p>Quote <strong>' + esc_(record.number) + '</strong> was approved by ' +
     esc_(signerName || record.contact) + ' on ' + esc_(signedAt.toLocaleString()) + '.</p>' +
@@ -190,6 +198,8 @@ function notifyApproval_(record, pdfBlob, signedAt, signerName) {
       row_('Phone', record.phone) +
       row_('Ticket #', record.ticket) +
       row_('Project', record.projectName) +
+      row_('Bill to', addressLines_(data.billing).join(', ')) +
+      row_('Ship to', shipTo) +
       row_('Quote date', record.date) +
       row_('Valid until', record.validUntil) +
       row_('Preparer', record.preparer) +
@@ -204,6 +214,21 @@ function notifyApproval_(record, pdfBlob, signedAt, signerName) {
     htmlBody: bodyHtml,
     attachments: [pdfBlob]
   });
+}
+
+// ["123 Main St.", "Suite 4", "Austin, TX 78701"], skipping blank parts.
+function addressLines_(a) {
+  a = a || {};
+  var cityLine = [a.city, [a.state, a.zip].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+  return [a.line1, a.line2, cityLine].filter(Boolean);
+}
+
+function addressCell_(title, lines) {
+  if (!lines.length) return '';
+  return '<td style="width:50%;padding:6px 16px;vertical-align:top;">' +
+    '<div style="font-size:9px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#cc1111;">' + title + '</div>' +
+    lines.map(function (ln) { return '<div style="font-size:11px;color:#444444;">' + esc_(ln) + '</div>'; }).join('') +
+  '</td>';
 }
 
 function row_(label, value) {
@@ -225,6 +250,8 @@ function buildPdfHtml_(record, signature) {
   var lines = data.lines || [];
   var totals = data.totals || {};
   var terms = data.terms || '';
+  var billLines = addressLines_(data.billing);
+  var shipLines = addressLines_(data.shipping);
   var logoUrl = 'https://sacton86.github.io/itemlist/Impact%20Logo.png';
 
   var rows = lines.map(function (l) {
@@ -316,6 +343,12 @@ function buildPdfHtml_(record, signature) {
     '</td>' +
   '</tr>' +
 '</table>' +
+
+((billLines.length || shipLines.length) ?
+  '<table style="width:100%;border-collapse:collapse;margin-top:4px;">' +
+    '<tr>' + addressCell_('Bill To', billLines) + addressCell_('Ship To', shipLines) + '</tr>' +
+  '</table>'
+  : '') +
 
 '<table style="width:100%;border-collapse:collapse;margin-top:16px;">' +
   '<tr>' +

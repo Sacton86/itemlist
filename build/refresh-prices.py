@@ -78,27 +78,60 @@ def sheet_price_columns(header_row):
 MIN_EXPECTED_ROWS = 120
 
 # ---------------------------------------------------------------------------
-# Part number -> image filename in images/.
+# Part number -> image filename(s) in images/.
 #
 # Filenames do not follow a scheme (REC - I5A75E.png is part REC-5A75E), so
 # this mapping is explicit. ADD NEW PHOTOS HERE, then re-run this script.
 #
+# Give a list to show several photos of one part: the first is the main photo
+# (card, quote thumbnail) and the rest are reachable with the gallery arrows.
+#
 # ---------------------------------------------------------------------------
 PART_IMAGE_MAP = {
     "1123 (C3Pro) Controller": "CONTROLLER - 1123.png",
+    "1123 Controller": "CONTROLLER - 1123.png",
     "4G Cradlepoint IBR200": "4G - IBR200.png",
     "4G-S400": "4G - S400.png",
     "4G-DIGIWR11XT": "4G - DIGI.png",
-    "HUB-40A": "HUB - 40A.png",
-    "HUB-P16-320": "HUB - P16320.png",
     "LRS-350-5": "POWER - LRS-350-5.png",
     "REC-907": "REC - i5-907.png",
     "REC-5A75E": "REC - I5A75E.png",
     "REC-i5A": "REC - I5A.png",
     "REC-i5+": "REC - i5+.png",
     "WIFI-Ubiquity Radio": "WIFI - NANOSTATIONM2.png",
-    "L-D-1-16-R-20x20": "MODULE - G1 16mm RGB.png",
+
+    # Transparent, cropped product shots (2026-09). Named after the part
+    # number; a part with a -front/-rear pair gets both as a gallery.
+    "HUB-40A": ["HUB-40A-front.png", "HUB-40A-rear.png"],
+    "HUB-P16-20x20": "HUB-P16-20x20.png",
+    "HUB-P16-320": ["HUB-P16-320-front.png", "HUB-P16-320-rear.png"],
+    "L-D-1-10-R-32x32": ["L-D-1-10-R-32x32-front.png", "L-D-1-10-R-32x32-rear.png"],
+    "L-D-1-16-R-20x20": ["L-D-1-16-R-20x20-front.png", "L-D-1-16-R-20x20-rear.png"],
+    "L-D-1-16-V-20x20": ["L-D-1-16-V-20x20-front.png", "L-D-1-16-V-20x20-rear.png"],
+    "L-D-1-20-R-16x16": ["L-D-1-20-R-16x16-front.png", "L-D-1-20-R-16x16-rear.png"],
+    "L-D-1-20-V-16x16": ["L-D-1-20-V-16x16-front.png", "L-D-1-20-V-16x16-rear.png"],
+    "M-G2-6": ["M-G2-6-front.png", "M-G2-6-rear.png"],
+    "M-G2-10": ["M-G2-10-front.png", "M-G2-10-rear.png"],
+    "M-G2-16": ["M-G2-16-front.png", "M-G2-16-rear.png"],
+    "M-G2-20": ["M-G2-20-front.png", "M-G2-20-rear.png"],
+    "M-G3-6": ["M-G3-6-front.png", "M-G3-6-rear.png"],
+    "M-G3-10": ["M-G3-10-front.png", "M-G3-10-rear.png"],
+    "M-G3-15": ["M-G3-15-front.png", "M-G3-15-rear.png"],
+    "M-G3-20": ["M-G3-20-front.png", "M-G3-20-rear.png"],
+    "MOD-TOOL-G1": "MOD-TOOL-G1.png",
+    "POE-BOX": "POE-BOX.png",
+    "POWER-LPV-35-12": "POWER-LPV-35-12.png",
+    "WIFI-BRACKET": "WIFI-BRACKET.png",
 }
+
+
+def part_images(part):
+    """Image filenames for a part, main ("front") view first. A map entry may be
+    a single filename or a list of them."""
+    entry = PART_IMAGE_MAP.get(part)
+    if not entry:
+        return []
+    return [entry] if isinstance(entry, str) else list(entry)
 
 # Image files in images/ that are deliberately NOT mapped: they show obsolete
 # parts that are not quoted, so they should stop appearing as open questions in
@@ -111,7 +144,6 @@ IGNORED_IMAGES = {
     "SEND - MSD300.png":       "obsolete, Sheet7 only",
     "CONTROLLER - PSD100.png": "obsolete, Sheet7 only",
     "CONTROLLER - IFC6309.png": "obsolete, Sheet7 only",
-    "MODULE - G1 16mm RGB (rear).png": "rear view of L-D-1-16-R-20x20; catalog only shows one photo per part",
 }
 
 # ---------------------------------------------------------------------------
@@ -328,7 +360,7 @@ def build_items(sheets):
 
         for (dealer, enduser), variant in variants.items():
             gens = variant["gens"]
-            image = PART_IMAGE_MAP.get(part)
+            images = [f"images/{f}" for f in part_images(part)]
             items.append({
                 "id": slugify(f"{part}-{desc}") or slugify(part),
                 "part": part,
@@ -339,7 +371,8 @@ def build_items(sheets):
                 "cat": categorize(part),
                 "dealer": dealer,
                 "enduser": enduser,
-                "image": f"images/{image}" if image else None,
+                "image": images[0] if images else None,
+                "images": images,
             })
 
     _ensure_unique_ids(items)
@@ -363,9 +396,10 @@ def _ensure_unique_ids(items):
 def check_images(items):
     """Warn if a mapped image file is not actually on disk."""
     missing_files = []
-    for part, filename in sorted(PART_IMAGE_MAP.items()):
-        if not os.path.isfile(os.path.join(IMAGE_DIR, filename)):
-            missing_files.append((part, filename))
+    for part in sorted(PART_IMAGE_MAP):
+        for filename in part_images(part):
+            if not os.path.isfile(os.path.join(IMAGE_DIR, filename)):
+                missing_files.append((part, filename))
     return missing_files
 
 
@@ -407,7 +441,7 @@ def write_missing_images(items):
             lines.append(f"| [ ] | `{item['part']}` | {desc} | {gens} |")
         lines.append("")
 
-    mapped = set(PART_IMAGE_MAP.values())
+    mapped = {f for part in PART_IMAGE_MAP for f in part_images(part)}
     on_disk = sorted(os.listdir(IMAGE_DIR)) if os.path.isdir(IMAGE_DIR) else []
     unclaimed = [f for f in on_disk if f not in mapped and f not in IGNORED_IMAGES]
 

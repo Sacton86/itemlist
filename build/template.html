@@ -225,6 +225,35 @@ main {
 }
 .card:hover .card-img .zoom-hint { opacity: 1; }
 
+/* ── IMAGE GALLERY (cards with more than one photo) ── */
+.gal-btn {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+  width: 28px; height: 28px; border-radius: 50%;
+  border: none; background: rgba(10,10,10,.55); color: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; padding: 0; opacity: .75;
+  transition: background .15s, opacity .15s;
+}
+.gal-btn svg { pointer-events: none; }
+.gal-btn.prev { left: 6px; }
+.gal-btn.next { right: 6px; }
+.card:hover .gal-btn { opacity: 1; }
+.gal-btn:hover { background: var(--red); }
+.gal-dots {
+  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 5px; pointer-events: none;
+}
+.gal-dots span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(10,10,10,.25); transition: background .15s;
+}
+.gal-dots span.on { background: var(--red); }
+.gal-view {
+  position: absolute; bottom: 7px; left: 8px;
+  font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--gray-500); pointer-events: none;
+}
+
 /* ── LIGHTBOX ── */
 .lightbox {
   position: fixed; inset: 0; z-index: 200;
@@ -235,7 +264,7 @@ main {
 }
 .lightbox.show { display: flex; }
 .lightbox img {
-  max-width: 100%; max-height: calc(100vh - 150px);
+  max-width: calc(100% - 120px); max-height: calc(100vh - 150px);
   object-fit: contain;
   background: var(--white); border-radius: 8px;
   box-shadow: 0 20px 60px rgba(0,0,0,.5);
@@ -257,6 +286,19 @@ main {
 }
 .lightbox-bar a:hover, .lightbox-bar button:hover { border-color: var(--red); color: var(--white); }
 .lightbox-bar .lb-close { font-size: 20px; line-height: 1; padding: 3px 11px; border-color: transparent; }
+.lb-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 1px solid #444; background: rgba(10,10,10,.7); color: var(--white);
+  display: none; align-items: center; justify-content: center;
+  cursor: pointer; padding: 0; transition: background .15s, border-color .15s;
+}
+.lb-nav svg { pointer-events: none; }
+.lightbox.multi .lb-nav { display: flex; }
+.lb-nav.prev { left: 22px; }
+.lb-nav.next { right: 22px; }
+.lb-nav:hover { background: var(--red); border-color: var(--red); }
+.lb-count { color: #999; font-size: 12px; font-weight: 600; white-space: nowrap; }
 .lightbox-tip {
   margin-top: 16px; color: #888; font-size: 12px; text-align: center;
 }
@@ -414,7 +456,7 @@ main {
 }
 .modal-close:hover { color: var(--red); }
 
-.modal-body { display: grid; grid-template-columns: 350px 1fr; gap: 0; }
+.modal-body { display: grid; grid-template-columns: 380px 1fr; gap: 0; }
 .pane-left { background: var(--white); padding: 26px 28px; border-right: 1px solid var(--gray-200); }
 .pane-right { padding: 26px 28px; }
 
@@ -437,6 +479,24 @@ main {
 .field input:focus, .field textarea:focus { outline: none; border-color: var(--red); }
 .field textarea { resize: vertical; min-height: 78px; line-height: 1.6; }
 .field-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field-csz { display: grid; grid-template-columns: 1fr 64px 88px; gap: 8px; }
+
+/* ── ADDRESSES ── */
+.ship-mode { display: flex; gap: 8px; margin-bottom: 11px; }
+.ship-mode label {
+  flex: 1; display: flex; align-items: center; gap: 7px; cursor: pointer;
+  font-size: 12px; font-weight: 600; color: var(--gray-700);
+  border: 1px solid var(--gray-200); border-radius: 6px; padding: 7px 10px;
+  transition: border-color .15s, background .15s;
+}
+.ship-mode label:hover { border-color: var(--gray-300); }
+.ship-mode label:has(input:checked) { border-color: var(--red); background: #fdf3f3; color: var(--black); }
+.ship-mode input { accent-color: var(--red); margin: 0; cursor: pointer; }
+.addr-same {
+  font-size: .8rem; color: var(--gray-500); line-height: 1.5;
+  background: var(--gray-100); border-radius: 6px; padding: 9px 11px;
+}
+.addr-same em { font-style: normal; }
 
 .check-na {
   display: flex; align-items: center; gap: 5px; margin-top: 5px;
@@ -661,6 +721,35 @@ footer span { color: var(--red); }
         </div>
 
         <div class="field-group">
+          <h3>Billing Address</h3>
+          <div class="field"><label>Street Address</label><input id="q-bill-line1" autocomplete="billing address-line1" placeholder="123 Main St." /></div>
+          <div class="field"><label>Suite / Unit <span style="color:var(--gray-500);font-weight:500">(optional)</span></label><input id="q-bill-line2" autocomplete="billing address-line2" /></div>
+          <div class="field-csz">
+            <div class="field"><label>City</label><input id="q-bill-city" autocomplete="billing address-level2" /></div>
+            <div class="field"><label>State</label><input id="q-bill-state" autocomplete="billing address-level1" maxlength="20" placeholder="TX" /></div>
+            <div class="field"><label>ZIP</label><input id="q-bill-zip" autocomplete="billing postal-code" maxlength="10" /></div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <h3>Shipping Address</h3>
+          <div class="ship-mode" role="radiogroup" aria-label="Shipping address">
+            <label><input type="radio" name="ship-mode" value="same" checked /> Same as billing</label>
+            <label><input type="radio" name="ship-mode" value="different" /> Different address</label>
+          </div>
+          <div class="addr-same" id="ship-same-preview"></div>
+          <div id="ship-fields" hidden>
+            <div class="field"><label>Street Address</label><input id="q-ship-line1" autocomplete="shipping address-line1" placeholder="456 Oak Ave." /></div>
+            <div class="field"><label>Suite / Unit <span style="color:var(--gray-500);font-weight:500">(optional)</span></label><input id="q-ship-line2" autocomplete="shipping address-line2" /></div>
+            <div class="field-csz">
+              <div class="field"><label>City</label><input id="q-ship-city" autocomplete="shipping address-level2" /></div>
+              <div class="field"><label>State</label><input id="q-ship-state" autocomplete="shipping address-level1" maxlength="20" placeholder="TX" /></div>
+              <div class="field"><label>ZIP</label><input id="q-ship-zip" autocomplete="shipping postal-code" maxlength="10" /></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
           <h3>Quote Details</h3>
           <div class="field"><label>Quote Number</label><input id="q-number" /></div>
           <div class="field-2">
@@ -741,12 +830,20 @@ footer span { color: var(--red); }
   <div class="lightbox-bar">
     <span class="lb-part" id="lb-part"></span>
     <span class="lb-desc" id="lb-desc"></span>
+    <span class="lb-count" id="lb-count"></span>
     <a id="lb-open" href="#" target="_blank" rel="noopener">Open in new tab</a>
     <button class="lb-close" id="lb-close" aria-label="Close">&times;</button>
   </div>
+  <button class="lb-nav prev" id="lb-prev" aria-label="Previous photo">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
   <img id="lb-img" src="" alt="" />
+  <button class="lb-nav next" id="lb-next" aria-label="Next photo">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+  </button>
   <p class="lightbox-tip">
-    <strong>Right-click the image</strong> to copy or save it &nbsp;·&nbsp; press <strong>Esc</strong> to close
+    <strong>Right-click the image</strong> to copy or save it &nbsp;·&nbsp;
+    <span id="lb-arrow-tip"><strong>&larr; &rarr;</strong> for more photos &nbsp;·&nbsp; </span>press <strong>Esc</strong> to close
   </p>
 </div>
 
@@ -774,7 +871,7 @@ footer span { color: var(--red); }
   // and, once they approve, emails the signed PDF back internally. Deploy the
   // project in google-apps-script/ (see google-apps-script/README.md) and
   // paste the resulting /exec URL here.
-  var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzkUdO0luiejoVCf6jnm1MLpAZl1BM-9tKzr0MxamB1i_LL_vDmyWN-IVJ-jOBEHSWu/exec';
+  var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxHhS50_gMBj9xm0OuQyh_jEExTU-teNZwqUvMH-iHy40vUbicST98LDwDrySZNCTnr/exec';
 
   var DEFAULT_TERMS =
     'Pricing is valid through the date shown above and is subject to change thereafter. ' +
@@ -823,6 +920,28 @@ footer span { color: var(--red); }
     return p == null ? 0 : p;
   }
   function genShort(g) { return g === 'Video Wall' ? 'VW' : g; }
+
+  // Every photo of an item, main ("front") photo first. Older data only has
+  // the single `image` field.
+  function itemImages(it) {
+    if (it.images && it.images.length) return it.images;
+    return it.image ? [it.image] : [];
+  }
+  // "…-front.png" -> "Front", "…-rear.png" -> "Rear"; blank if the filename
+  // doesn't say which side it is.
+  function viewLabel(path) {
+    var m = /-(front|rear|back|side|top)\.[a-z]+$/i.exec(path || '');
+    return m ? m[1].charAt(0).toUpperCase() + m[1].slice(1).toLowerCase() : '';
+  }
+  // Which photo each card is showing, so a re-render (filtering, adding to the
+  // quote) doesn't snap the gallery back to the front.
+  var galleryIdx = {};
+  function galIndex(it) {
+    var n = itemImages(it).length;
+    return n ? ((galleryIdx[it.id] || 0) % n + n) % n : 0;
+  }
+  var CHEVRON_L = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
+  var CHEVRON_R = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>';
   function absUrl(path) {
     try { return new URL(path, document.baseURI).href; } catch (e) { return path; }
   }
@@ -914,9 +1033,19 @@ footer span { color: var(--red); }
     var ok  = priceable(it);
     var pv  = state.priceView;
 
-    var img = it.image
-      ? '<img src="' + esc(it.image) + '" alt="' + esc(it.part) + '" loading="lazy" data-act="zoom" />' +
-        '<span class="zoom-hint">Click to enlarge</span>'
+    var imgs = itemImages(it);
+    var gi   = galIndex(it);
+    var img = imgs.length
+      ? '<img src="' + esc(imgs[gi]) + '" alt="' + esc(it.part) + '" loading="lazy" data-act="zoom" />' +
+        '<span class="zoom-hint">Click to enlarge</span>' +
+        (imgs.length > 1
+          ? '<button class="gal-btn prev" data-act="gal-prev" aria-label="Previous photo">' + CHEVRON_L + '</button>' +
+            '<button class="gal-btn next" data-act="gal-next" aria-label="Next photo">' + CHEVRON_R + '</button>' +
+            '<span class="gal-view">' + esc(viewLabel(imgs[gi])) + '</span>' +
+            '<span class="gal-dots">' + imgs.map(function (_, i) {
+              return '<span' + (i === gi ? ' class="on"' : '') + '></span>';
+            }).join('') + '</span>'
+          : '')
       : '<div class="placeholder"><span class="mono">' + esc(it.part) +
         '</span><span class="note">No photo</span></div>';
 
@@ -1052,7 +1181,19 @@ footer span { color: var(--red); }
     var input = card.querySelector('[data-act="qty"]');
     var act = btn.dataset.act;
 
-    if (act === 'zoom') { openLightbox(BY_ID[id]); return; }
+    if (act === 'zoom') { openLightbox(BY_ID[id], galIndex(BY_ID[id])); return; }
+
+    if (act === 'gal-prev' || act === 'gal-next') {
+      var it = BY_ID[id];
+      var imgs = itemImages(it);
+      galleryIdx[id] = galIndex(it) + (act === 'gal-next' ? 1 : -1);
+      var gi = galIndex(it);
+      var box = card.querySelector('.card-img');
+      box.querySelector('img').src = imgs[gi];
+      box.querySelector('.gal-view').textContent = viewLabel(imgs[gi]);
+      box.querySelectorAll('.gal-dots span').forEach(function (d, i) { d.classList.toggle('on', i === gi); });
+      return;
+    }
 
     if (act === 'inc' || act === 'dec') {
       var v = Math.max(1, (parseInt(input.value, 10) || 1) + (act === 'inc' ? 1 : -1));
@@ -1110,18 +1251,40 @@ footer span { color: var(--red); }
   // ---------------------------------------------------------------- lightbox
   var lightbox = document.getElementById('lightbox');
 
-  function openLightbox(it) {
-    if (!it || !it.image) return;
-    document.getElementById('lb-img').src = it.image;
-    document.getElementById('lb-img').alt = it.part;
+  var lbItem = null, lbIdx = 0;
+
+  function showLightboxImage() {
+    var imgs = itemImages(lbItem);
+    lbIdx = (lbIdx % imgs.length + imgs.length) % imgs.length;
+    var label = viewLabel(imgs[lbIdx]);
+    document.getElementById('lb-img').src = imgs[lbIdx];
+    document.getElementById('lb-img').alt = lbItem.part + (label ? ' (' + label + ')' : '');
+    document.getElementById('lb-open').href = imgs[lbIdx];
+    document.getElementById('lb-count').textContent = imgs.length > 1
+      ? (label ? label + ' · ' : '') + (lbIdx + 1) + ' of ' + imgs.length : '';
+    lightbox.classList.toggle('multi', imgs.length > 1);
+    document.getElementById('lb-arrow-tip').style.display = imgs.length > 1 ? '' : 'none';
+  }
+  function stepLightbox(delta) {
+    if (!lbItem || itemImages(lbItem).length < 2) return;
+    lbIdx += delta;
+    showLightboxImage();
+  }
+  function openLightbox(it, idx) {
+    if (!it || !itemImages(it).length) return;
+    lbItem = it;
+    lbIdx = idx || 0;
     document.getElementById('lb-part').textContent = it.part;
     document.getElementById('lb-desc').textContent = it.desc !== it.part ? it.desc : '';
-    document.getElementById('lb-open').href = it.image;
+    showLightboxImage();
     lightbox.classList.add('show');
     document.body.style.overflow = 'hidden';
   }
+  document.getElementById('lb-prev').addEventListener('click', function () { stepLightbox(-1); });
+  document.getElementById('lb-next').addEventListener('click', function () { stepLightbox(1); });
   function closeLightbox() {
     lightbox.classList.remove('show');
+    lbItem = null;
     document.getElementById('lb-img').src = '';
     // The quote modal may still be open underneath; only release the scroll
     // lock if nothing else needs it.
@@ -1182,6 +1345,7 @@ footer span { color: var(--red); }
     } catch (e) {}
 
     document.querySelector('input[name="basis"][value="' + state.basis + '"]').checked = true;
+    refreshShipMode();
     document.getElementById('modal-msg').textContent = '';
     renderLines();
     modal.classList.add('show');
@@ -1344,6 +1508,51 @@ footer span { color: var(--red); }
     });
   });
 
+  // ---------------------------------------------------------------- addresses
+  var ADDR_KEYS = ['line1', 'line2', 'city', 'state', 'zip'];
+
+  function readAddress(prefix) {
+    var a = {};
+    ADDR_KEYS.forEach(function (k) { a[k] = document.getElementById('q-' + prefix + '-' + k).value.trim(); });
+    return a;
+  }
+  function addressEmpty(a) {
+    return !ADDR_KEYS.some(function (k) { return a[k]; });
+  }
+  // ["123 Main St.", "Suite 4", "Austin, TX 78701"], skipping blank parts.
+  function addressLines(a) {
+    var cityLine = [a.city, [a.state, a.zip].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+    return [a.line1, a.line2, cityLine].filter(Boolean);
+  }
+  function shipSameAsBilling() {
+    return document.querySelector('input[name="ship-mode"]:checked').value === 'same';
+  }
+  function quoteAddresses() {
+    var billing = readAddress('bill');
+    var same = shipSameAsBilling();
+    return { billing: billing, shipping: same ? billing : readAddress('ship'), shipSameAsBilling: same };
+  }
+
+  function refreshShipMode() {
+    var same = shipSameAsBilling();
+    document.getElementById('ship-fields').hidden = same;
+    var preview = document.getElementById('ship-same-preview');
+    preview.hidden = !same;
+    var lines = addressLines(readAddress('bill'));
+    preview.innerHTML = lines.length
+      ? lines.map(esc).join('<br>')
+      : '<em>Ships to the billing address above.</em>';
+  }
+  document.querySelectorAll('input[name="ship-mode"]').forEach(function (r) {
+    r.addEventListener('change', function () {
+      refreshShipMode();
+      if (!shipSameAsBilling()) document.getElementById('q-ship-line1').focus();
+    });
+  });
+  ADDR_KEYS.forEach(function (k) {
+    document.getElementById('q-bill-' + k).addEventListener('input', refreshShipMode);
+  });
+
   function wireNaCheckbox(checkboxId, inputId) {
     document.getElementById(checkboxId).addEventListener('change', function (e) {
       var input = document.getElementById(inputId);
@@ -1366,6 +1575,10 @@ footer span { color: var(--red); }
   document.getElementById('btn-back').addEventListener('click', closeModal);
   modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
   document.addEventListener('keydown', function (e) {
+    if (lightbox.classList.contains('show') && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+      stepLightbox(e.key === 'ArrowRight' ? 1 : -1);
+      return;
+    }
     if (e.key !== 'Escape') return;
     // Lightbox sits on top, so it takes Escape first.
     if (lightbox.classList.contains('show')) { closeLightbox(); return; }
@@ -1438,6 +1651,7 @@ footer span { color: var(--red); }
     }
 
     var m = quoteMath();
+    var addr = quoteAddresses();
     var payload = {
       action: 'create',
       number: document.getElementById('q-number').value.trim(),
@@ -1451,6 +1665,9 @@ footer span { color: var(--red); }
       validUntil: document.getElementById('q-valid').value,
       preparer: preparer,
       preparerEmail: preparerEmail,
+      billing: addr.billing,
+      shipping: addr.shipping,
+      shipSameAsBilling: addr.shipSameAsBilling,
       total: m.total,
       html: buildQuoteDoc(),
       // Structured data alongside the rendered HTML above -- the backend
@@ -1534,6 +1751,17 @@ footer span { color: var(--red); }
     var qvalid   = document.getElementById('q-valid').value;
     var preparer = document.getElementById('q-preparer').value.trim();
     var terms    = document.getElementById('q-terms').value.trim();
+    var addr     = quoteAddresses();
+    var billLines = addressLines(addr.billing);
+    var shipLines = addressLines(addr.shipping);
+
+    function addrParty(title, lines) {
+      if (!lines.length) return '';
+      return '<div class="party"><h3>' + title + '</h3>' +
+        lines.map(function (ln, i) {
+          return '<div class="' + (i === 0 ? 'nm' : 'ln') + '">' + esc(ln) + '</div>';
+        }).join('') + '</div>';
+    }
 
     var rows = m.lines.map(function (l) {
       var thumb = l.item.image
@@ -1584,7 +1812,7 @@ footer span { color: var(--red); }
 '.dates{display:flex;gap:26px;flex-wrap:wrap}' +
 '.dates div{font-size:9px;color:var(--gray-500);letter-spacing:.1em;text-transform:uppercase;line-height:1.5}' +
 '.dates strong{display:block;font-size:.85rem;font-weight:600;color:var(--black);text-transform:none;letter-spacing:0;line-height:1.4}' +
-'.parties{display:grid;grid-template-columns:1fr 1fr;gap:30px;padding-top:13px}' +
+'.parties{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:18px 30px;padding-top:13px}' +
 '.party h3{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin-bottom:4px}' +
 '.party .nm{font-size:.92rem;font-weight:700;color:var(--black);line-height:1.35}' +
 '.party .ln{font-size:.8rem;color:var(--gray-500);line-height:1.5}' +
@@ -1657,6 +1885,8 @@ footer span { color: var(--red); }
       (email ? '<div class="ln">' + esc(email) + '</div>' : '') +
       (phone ? '<div class="ln">' + esc(phone) + '</div>' : '') +
     '</div>' +
+    addrParty('Bill To', billLines) +
+    addrParty('Ship To', shipLines) +
     '<div class="party"><h3>Prepared By</h3>' +
       '<div class="nm">Impact LED Signs</div>' +
       (preparer ? '<div class="ln">' + esc(preparer) + '</div>' : '') +
