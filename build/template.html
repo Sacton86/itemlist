@@ -722,6 +722,7 @@ footer span { color: var(--red); }
 
         <div class="field-group">
           <h3>Billing Address</h3>
+          <div class="field"><label>Name</label><input id="q-bill-name" autocomplete="billing name" placeholder="Jane Doe" /></div>
           <div class="field"><label>Street Address</label><input id="q-bill-line1" autocomplete="billing address-line1" placeholder="123 Main St." /></div>
           <div class="field"><label>Suite / Unit <span style="color:var(--gray-500);font-weight:500">(optional)</span></label><input id="q-bill-line2" autocomplete="billing address-line2" /></div>
           <div class="field-csz">
@@ -739,6 +740,7 @@ footer span { color: var(--red); }
           </div>
           <div class="addr-same" id="ship-same-preview"></div>
           <div id="ship-fields" hidden>
+            <div class="field"><label>Name</label><input id="q-ship-name" autocomplete="shipping name" placeholder="Receiving contact" /></div>
             <div class="field"><label>Street Address</label><input id="q-ship-line1" autocomplete="shipping address-line1" placeholder="456 Oak Ave." /></div>
             <div class="field"><label>Suite / Unit <span style="color:var(--gray-500);font-weight:500">(optional)</span></label><input id="q-ship-line2" autocomplete="shipping address-line2" /></div>
             <div class="field-csz">
@@ -1509,7 +1511,7 @@ footer span { color: var(--red); }
   });
 
   // ---------------------------------------------------------------- addresses
-  var ADDR_KEYS = ['line1', 'line2', 'city', 'state', 'zip'];
+  var ADDR_KEYS = ['name', 'line1', 'line2', 'city', 'state', 'zip'];
 
   function readAddress(prefix) {
     var a = {};
@@ -1519,10 +1521,10 @@ footer span { color: var(--red); }
   function addressEmpty(a) {
     return !ADDR_KEYS.some(function (k) { return a[k]; });
   }
-  // ["123 Main St.", "Suite 4", "Austin, TX 78701"], skipping blank parts.
+  // ["Jane Doe", "123 Main St.", "Suite 4", "Austin, TX 78701"], skipping blank parts.
   function addressLines(a) {
     var cityLine = [a.city, [a.state, a.zip].filter(Boolean).join(' ')].filter(Boolean).join(', ');
-    return [a.line1, a.line2, cityLine].filter(Boolean);
+    return [a.name, a.line1, a.line2, cityLine].filter(Boolean);
   }
   function shipSameAsBilling() {
     return document.querySelector('input[name="ship-mode"]:checked').value === 'same';

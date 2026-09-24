@@ -216,18 +216,22 @@ function notifyApproval_(record, pdfBlob, signedAt, signerName) {
   });
 }
 
-// ["123 Main St.", "Suite 4", "Austin, TX 78701"], skipping blank parts.
+// ["Jane Doe", "123 Main St.", "Suite 4", "Austin, TX 78701"], skipping blank parts.
 function addressLines_(a) {
   a = a || {};
   var cityLine = [a.city, [a.state, a.zip].filter(Boolean).join(' ')].filter(Boolean).join(', ');
-  return [a.line1, a.line2, cityLine].filter(Boolean);
+  return [a.name, a.line1, a.line2, cityLine].filter(Boolean);
 }
 
 function addressCell_(title, lines) {
   if (!lines.length) return '';
   return '<td style="width:50%;padding:6px 16px;vertical-align:top;">' +
     '<div style="font-size:9px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#cc1111;">' + title + '</div>' +
-    lines.map(function (ln) { return '<div style="font-size:11px;color:#444444;">' + esc_(ln) + '</div>'; }).join('') +
+    lines.map(function (ln, i) {
+      return i === 0
+        ? '<div style="font-size:12px;font-weight:bold;color:#0a0a0a;">' + esc_(ln) + '</div>'
+        : '<div style="font-size:11px;color:#444444;">' + esc_(ln) + '</div>';
+    }).join('') +
   '</td>';
 }
 
