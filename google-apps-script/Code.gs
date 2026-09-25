@@ -235,6 +235,13 @@ function addressCell_(title, lines) {
   '</td>';
 }
 
+// Google Docs' HTML import ignores CSS word-wrapping, so a long email (no
+// spaces) runs off the edge of the PDF. Zero-width spaces after "@" and "."
+// give it invisible places to wrap.
+function breakableEmail_(email) {
+  return esc_(email).replace(/([@.])/g, '$1&#8203;');
+}
+
 function row_(label, value) {
   return '<tr><td style="color:#888;">' + esc_(label) + '</td><td>' + esc_(value) + '</td></tr>';
 }
@@ -335,7 +342,7 @@ function buildPdfHtml_(record, signature) {
       '<div style="font-size:9px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#cc1111;">Prepared For</div>' +
       '<div style="font-size:12px;font-weight:bold;color:#0a0a0a;">' + esc_(record.company || record.contact || '—') + '</div>' +
       (record.company && record.contact ? '<div style="font-size:11px;color:#888888;">' + esc_(record.contact) + '</div>' : '') +
-      (record.email ? '<div style="font-size:11px;color:#888888;">' + esc_(record.email) + '</div>' : '') +
+      (record.email ? '<div style="font-size:11px;color:#888888;">' + breakableEmail_(record.email) + '</div>' : '') +
       (record.phone ? '<div style="font-size:11px;color:#888888;">' + esc_(record.phone) + '</div>' : '') +
       (record.ticket ? '<div style="font-size:11px;color:#888888;">Ticket #: ' + esc_(record.ticket) + '</div>' : '') +
       (record.projectName ? '<div style="font-size:11px;color:#888888;">Project: ' + esc_(record.projectName) + '</div>' : '') +
