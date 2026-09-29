@@ -43,6 +43,11 @@ download fails or the sheet layout changes.
 
 Then commit and push to update the live site.
 
+Alternatively, the price list sheet has a **Price List → Refresh Website**
+menu button (backed by the `refresh-prices` GitHub Action) so anyone with
+edit access to the sheet can trigger a refresh without touching a terminal.
+See `google-apps-script/price-list-refresh/README.md` for one-time setup.
+
 ## Adding a product photo
 
 1. Drop the image in `images/`.
@@ -64,6 +69,7 @@ Then commit and push to update the live site.
 | `images/` | Product photos. |
 | `style template.html` | The original SOP document the visual style came from. |
 | `google-apps-script/` | Backend for the client e-signature / approval-notification flow. |
+| `google-apps-script/price-list-refresh/` | "Refresh Website" button on the price list sheet. |
 
 ## Notes on the data
 
