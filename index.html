@@ -785,7 +785,8 @@ footer span { color: var(--red); }
                 <button type="button" class="mode-btn" id="q-discount-mode" title="Switch between percent and dollars">%</button>
               </div>
             </div>
-            <div class="field"><label>Shipping ($)</label><input id="q-shipping" type="number" min="0" step="0.01" value="0" /></div>
+            <div class="field"><label>Shipping ($)</label><input id="q-shipping" type="number" min="0" step="0.01" placeholder="0.00" />
+              <label class="check-na"><input type="checkbox" id="q-ship-free" /> Free Shipping</label></div>
           </div>
         </div>
 
@@ -1336,6 +1337,9 @@ footer span { color: var(--red); }
     document.getElementById('q-project').value = '';
     document.getElementById('q-project').disabled = false;
     document.getElementById('q-project-na').checked = false;
+    document.getElementById('q-shipping').value = '';
+    document.getElementById('q-shipping').disabled = false;
+    document.getElementById('q-ship-free').checked = false;
     if (!document.getElementById('q-terms').value) {
       document.getElementById('q-terms').value = DEFAULT_TERMS;
     }
@@ -1378,7 +1382,7 @@ footer span { color: var(--red); }
     return {
       lines: lines, subtotal: gross, lineDiscAmt: lineDiscAmt,
       qDisc: qDisc, qDiscMode: state.qDiscMode, discAmt: discAmt,
-      ship: ship, total: afterDisc + ship
+      ship: ship, shipFree: document.getElementById('q-ship-free').checked, total: afterDisc + ship
     };
   }
 
@@ -1495,6 +1499,7 @@ footer span { color: var(--red); }
               '<span class="v">&minus;' + money(m.discAmt) + '</span></div>';
     }
     if (m.ship > 0) rows += '<div class="row"><span class="k">Shipping</span><span class="v">' + money(m.ship) + '</span></div>';
+    else if (m.shipFree) rows += '<div class="row"><span class="k">Shipping</span><span class="v">Free</span></div>';
     rows += '<div class="row grand"><span class="k">Total</span><span class="v">' + money(m.total) + '</span></div>';
     host.innerHTML = rows;
   }
@@ -1564,6 +1569,17 @@ footer span { color: var(--red); }
   }
   wireNaCheckbox('q-ticket-na', 'q-ticket');
   wireNaCheckbox('q-project-na', 'q-project');
+  wireNaCheckbox('q-ship-free', 'q-shipping');
+  document.getElementById('q-ship-free').addEventListener('change', refreshTotalsOnly);
+
+  // Shipping must be entered (0 is fine) or marked free. Returns true if missing.
+  function shippingMissing(msg) {
+    if (document.getElementById('q-ship-free').checked) return false;
+    if (document.getElementById('q-shipping').value.trim() !== '') return false;
+    msg.textContent = 'Enter a shipping cost or check "Free Shipping" first.';
+    document.getElementById('q-shipping').focus();
+    return true;
+  }
 
   document.getElementById('q-preparer').addEventListener('change', function (e) {
     try { localStorage.setItem(LS_PREP, e.target.value); } catch (err) {}
@@ -1597,6 +1613,7 @@ footer span { color: var(--red); }
       document.getElementById('q-company').focus();
       return;
     }
+    if (shippingMissing(msg)) return;
     msg.textContent = '';
 
     var win = window.open('', '_blank');
@@ -1647,6 +1664,7 @@ footer span { color: var(--red); }
       document.getElementById('q-project').focus();
       return;
     }
+    if (shippingMissing(msg)) return;
     var billing = readAddress('bill');
     var BILL_REQUIRED = [['name', 'name'], ['line1', 'street address'], ['city', 'city'], ['state', 'state'], ['zip', 'ZIP']];
     var missingBill = BILL_REQUIRED.filter(function (f) { return !billing[f[0]]; });
@@ -1802,6 +1820,7 @@ footer span { color: var(--red); }
         '</td><td class="n">&minus;' + money(m.discAmt) + '</td></tr>';
     }
     if (m.ship > 0) totalRows += '<tr><td>Shipping &amp; handling</td><td class="n">' + money(m.ship) + '</td></tr>';
+    else if (m.shipFree) totalRows += '<tr><td>Shipping &amp; handling</td><td class="n">Free</td></tr>';
 
     var units = m.lines.reduce(function (a, l) { return a + l.qty; }, 0);
 
