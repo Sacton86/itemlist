@@ -1861,7 +1861,7 @@ footer span { color: var(--red); }
 'table.totals tr.grand td:first-child{color:#999;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}' +
 'table.totals tr.grand td.n{color:var(--white);font-size:1.3rem;font-weight:700}' +
 '.callout{background:#e8f0fe;border-left:4px solid #1a56a0;border-radius:0 6px 6px 0;padding:14px 18px;margin:0 26px 24px;font-size:.85rem;color:#1a3060;page-break-inside:avoid}' +
-'.tax-note{font-size:.78rem;color:var(--gray-500);margin:0 26px 20px;text-align:right}' +
+'.callout strong.tax-line{display:inline;margin:0}' +
 '.callout strong{display:block;color:#0f1f40;margin-bottom:3px}' +
 'footer{background:var(--black);color:#555;text-align:center;padding:22px;font-size:.78rem}' +
 'footer span{color:var(--red)}' +
@@ -1919,8 +1919,8 @@ footer span { color: var(--red); }
     '<div class="totals-wrap"><table class="totals"><tbody>' + totalRows +
       '<tr class="grand"><td>Total</td><td class="n">' + money(m.total) + '</td></tr>' +
     '</tbody></table></div>' +
-    '<p class="tax-note">Any applicable taxes due will be charged and may not be reflected in the quoted price.</p>' +
-    (terms ? '<div class="callout"><strong>Terms &amp; Notes</strong>' + esc(terms) + '</div>' : '') +
+    '<div class="callout"><strong>Terms &amp; Notes</strong>' + (terms ? esc(terms) + '<br><br>' : '') +
+      '<strong class="tax-line">Sales tax: Any applicable taxes due will be charged and may not be reflected in the quoted price.</strong></div>' +
   '</div>' +
 '</main>' +
 
