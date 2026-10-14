@@ -43,7 +43,7 @@ To add one: drop the file in `images/`, add a line to `PART_IMAGE_MAP` in
 
 | | Part Number | Description | Used in |
 |---|---|---|---|
-| [ ] | `A-350AK` | Power Supply for WLED (Sub for A-350-AA) | G3 |
+| [ ] | `A-350AK-5` | Power Supply for WLED (Sub for A-350AA-5) | G3 |
 | [ ] | `CABLE-POWER-INPUT-3` | AC Power Input Caple | G3 |
 | [ ] | `Ethernet - SWS` | Single Sided Weather Proof Cable (SHORT) | G3 |
 | [ ] | `Power Supply` | Great Wall 3.8 V | G3 |
