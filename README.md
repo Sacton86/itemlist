@@ -20,6 +20,10 @@ install, no server, no internet needed once loaded.
   to email them a link where they can review the quote and sign off on it electronically.
   Once they approve, the preparer and accounting get an email with the signed PDF
   attached. See `google-apps-script/README.md` for how that backend is set up.
+  The optional **CC** and **BCC** fields under the client's email add extra recipients to
+  that review-and-approve email (separate several addresses with a semicolon). CC
+  addresses are visible to the client; BCC addresses are hidden. Neither is printed on
+  the quote.
 
 Discounts work per line and on the whole quote. Each one has a **% / $** button —
 click it to switch between a percentage and a flat dollar amount. A dollar discount

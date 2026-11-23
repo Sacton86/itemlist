@@ -717,6 +717,10 @@ footer span { color: var(--red); }
           <div class="field"><label>Customer / Company</label><input id="q-company" placeholder="Acme Signs LLC" /></div>
           <div class="field"><label>Contact Name</label><input id="q-contact" placeholder="Jane Doe" /></div>
           <div class="field"><label>Email <span style="color:var(--gray-500);font-weight:500">(separate multiple addresses with a semicolon)</span></label><input id="q-email" type="text" inputmode="email" autocomplete="email" placeholder="jane@acmesigns.com; bob@acmesigns.com" /></div>
+          <div class="field-2">
+            <div class="field"><label>CC <span style="color:var(--gray-500);font-weight:500">(optional)</span></label><input id="q-cc" type="text" inputmode="email" autocomplete="off" placeholder="sales@acmesigns.com" title="Separate multiple addresses with a semicolon. Everyone on the To and CC lines can see CC addresses." /></div>
+            <div class="field"><label>BCC <span style="color:var(--gray-500);font-weight:500">(optional, hidden)</span></label><input id="q-bcc" type="text" inputmode="email" autocomplete="off" placeholder="you@impactledsigns.com" title="Separate multiple addresses with a semicolon. BCC addresses are hidden from the client and anyone on CC." /></div>
+          </div>
           <div class="field"><label>Phone</label><input id="q-phone" placeholder="(555) 123-4567" /></div>
         </div>
 
@@ -1642,6 +1646,8 @@ footer span { color: var(--red); }
     var contact       = document.getElementById('q-contact').value.trim();
     var emails        = parseEmails(document.getElementById('q-email').value);
     var email         = emails.join('; ');
+    var ccEmails      = parseEmails(document.getElementById('q-cc').value);
+    var bccEmails     = parseEmails(document.getElementById('q-bcc').value);
     var preparer      = document.getElementById('q-preparer').value.trim();
     var preparerEmails = parseEmails(document.getElementById('q-preparer-email').value);
     var preparerEmail = preparerEmails.join('; ');
@@ -1665,6 +1671,20 @@ footer span { color: var(--red); }
       msg.textContent = "This client email doesn't look right: " + badClient.join(', ') +
         ' (separate multiple addresses with a semicolon).';
       document.getElementById('q-email').focus();
+      return;
+    }
+    var badCc = ccEmails.filter(function (a) { return !isValidEmail(a); });
+    if (badCc.length) {
+      msg.textContent = "This CC email doesn't look right: " + badCc.join(', ') +
+        ' (separate multiple addresses with a semicolon).';
+      document.getElementById('q-cc').focus();
+      return;
+    }
+    var badBcc = bccEmails.filter(function (a) { return !isValidEmail(a); });
+    if (badBcc.length) {
+      msg.textContent = "This BCC email doesn't look right: " + badBcc.join(', ') +
+        ' (separate multiple addresses with a semicolon).';
+      document.getElementById('q-bcc').focus();
       return;
     }
     if (!preparer || !preparerEmail) {
@@ -1712,6 +1732,10 @@ footer span { color: var(--red); }
       company: company,
       contact: contact,
       email: email,
+      // Extra recipients on the "review & approve" email only. They are not
+      // printed on the quote itself.
+      cc: ccEmails.join('; '),
+      bcc: bccEmails.join('; '),
       phone: document.getElementById('q-phone').value.trim(),
       ticket: ticket,
       projectName: project,
@@ -1771,7 +1795,9 @@ footer span { color: var(--red); }
       .then(function (data) {
         if (data && data.ok) {
           msg.textContent = 'Sent — ' + emails.join(', ') +
-            (emails.length > 1 ? ' will each get' : ' will get') + ' a link to review and approve.';
+            (emails.length > 1 ? ' will each get' : ' will get') + ' a link to review and approve.' +
+            (ccEmails.length ? ' CC: ' + ccEmails.join(', ') + '.' : '') +
+            (bccEmails.length ? ' BCC: ' + bccEmails.join(', ') + '.' : '');
           bumpQuoteSeq();
         } else {
           msg.textContent = (data && data.error) || 'Something went wrong sending the quote.';

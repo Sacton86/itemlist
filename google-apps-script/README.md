@@ -72,7 +72,9 @@ version: **Deploy → Manage deployments → edit (pencil) → New version → D
    `buildQuoteDoc()` produces for Preview) for on-screen display, and the underlying
    structured data (line items, totals, terms) for PDF generation.
 2. `Code.gs` stores both in the "Quotes" sheet under a random token and emails the client
-   a link: `<web app url>?token=<uuid>`.
+   a link: `<web app url>?token=<uuid>`. Optional `cc` / `bcc` addresses from the quote form
+   go on that same email (an address already on To is dropped from CC, and one already on
+   To or CC is dropped from BCC); both lists are also recorded in the row's `dataJson`.
 3. `doGet` serves `Signing.html` for that token — an iframe of the exact quote HTML plus
    a signature pad. What the client sees is untouched by anything below.
 4. On approval, `Code.gs` builds a *separate*, simplified HTML document from the

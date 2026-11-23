@@ -93,13 +93,31 @@ function handleCreate_(body) {
   // Both email fields may hold several addresses separated by ";" (or ",").
   var clientEmails = parseEmails_(body.email);
   var preparerEmails = parseEmails_(body.preparerEmail);
+  // Optional extra recipients on the client's review email. Older versions of
+  // the site don't send these fields, which just means "none".
+  var ccEmails = parseEmails_(body.cc);
+  var bccEmails = parseEmails_(body.bcc);
   if (!clientEmails.length || !preparerEmails.length || !body.html) {
     return jsonOut_({ ok: false, error: 'Missing required quote fields.' });
   }
-  var badEmails = clientEmails.concat(preparerEmails).filter(function (a) { return !EMAIL_RE_.test(a); });
+  var badEmails = clientEmails.concat(preparerEmails, ccEmails, bccEmails)
+    .filter(function (a) { return !EMAIL_RE_.test(a); });
   if (badEmails.length) {
     return jsonOut_({ ok: false, error: 'Invalid email address: ' + badEmails.join(', ') });
   }
+  // List each person once: an address already on To is dropped from CC, and one
+  // already on To or CC is dropped from BCC (so a BCC copy never duplicates a
+  // visible one).
+  var listed = {};
+  clientEmails.forEach(function (a) { listed[a.toLowerCase()] = true; });
+  function notYetListed_(a) {
+    var key = a.toLowerCase();
+    if (listed[key]) return false;
+    listed[key] = true;
+    return true;
+  }
+  ccEmails = ccEmails.filter(notYetListed_);
+  bccEmails = bccEmails.filter(notYetListed_);
   body.email = clientEmails.join('; ');
   body.preparerEmail = preparerEmails.join('; ');
 
@@ -109,7 +127,10 @@ function handleCreate_(body) {
     totals: body.totals || {},
     terms: body.terms || '',
     // Addresses ride in dataJson rather than new sheet columns, so rows
-    // written before they existed still line up with HEADERS.
+    // written before they existed still line up with HEADERS. (Same goes for
+    // the CC/BCC lists, kept as a record of who the review email went to.)
+    cc: ccEmails.join('; '),
+    bcc: bccEmails.join('; '),
     billing: body.billing || {},
     shipping: body.shipping || {},
     shipSameAsBilling: !!body.shipSameAsBilling
@@ -134,12 +155,16 @@ function handleCreate_(body) {
     '<p style="color:#888;font-size:12px;">If the link above doesn\'t work, copy this URL into ' +
     'your browser:<br>' + signUrl + '</p>';
 
+  var mail = {
+    to: clientEmails.join(','),
+    subject: 'Quote ' + body.number + ' from ' + COMPANY_NAME + ' — please review & approve',
+    htmlBody: htmlBody
+  };
+  if (ccEmails.length) mail.cc = ccEmails.join(',');
+  if (bccEmails.length) mail.bcc = bccEmails.join(',');
+
   try {
-    MailApp.sendEmail({
-      to: clientEmails.join(','),
-      subject: 'Quote ' + body.number + ' from ' + COMPANY_NAME + ' — please review & approve',
-      htmlBody: htmlBody
-    });
+    MailApp.sendEmail(mail);
   } catch (mailErr) {
     // The row is already saved; flag it so it's clear no email ever went out.
     Logger.log('sendEmail failed for token ' + token + ': ' + mailErr);
