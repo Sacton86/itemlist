@@ -13,6 +13,11 @@ install, no server, no internet needed once loaded.
 - Search by part number or description; filter by generation, category, or missing photo.
 - Click any product photo to view it full-screen and copy or save it.
 - Set a quantity, hit **Add**, then **Create Quote**.
+- **Onsite Labor** has no fixed price. It sits in its own *Labor & Services* section at the
+  top of the catalog. Add it like any item, then type your price into its **Unit Price**
+  box on the quote screen. Any amount works, and it is the same for Dealer and End User.
+  Use Qty for hours, or leave it at 1 for a flat charge. The quote can't be previewed or
+  sent until the price is filled in.
 - Pick **Dealer** or **End User** pricing, fill in the customer details and billing
   address (shipping defaults to **Same as billing**; pick **Different address** to enter
   another), and either
@@ -84,5 +89,7 @@ See `google-apps-script/price-list-refresh/README.md` for one-time setup.
   on G1/G2. Items are keyed on part + description + price so the right price shows for
   the right generation.
 - Rows with no usable price are shown but badged **Price TBD** and cannot be quoted.
+- Onsite Labor is built into the page (`build/template.html`), not the price sheet, so a
+  price refresh never touches it.
 - `build/.pricelist-cache.xlsx` is gitignored: it is the raw workbook and still contains
   the Cost column.
