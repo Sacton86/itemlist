@@ -716,7 +716,7 @@ footer span { color: var(--red); }
           <h3>Prepared For</h3>
           <div class="field"><label>Customer / Company</label><input id="q-company" placeholder="Acme Signs LLC" /></div>
           <div class="field"><label>Contact Name</label><input id="q-contact" placeholder="Jane Doe" /></div>
-          <div class="field"><label>Email</label><input id="q-email" type="email" placeholder="jane@acmesigns.com" /></div>
+          <div class="field"><label>Email <span style="color:var(--gray-500);font-weight:500">(separate multiple addresses with a semicolon)</span></label><input id="q-email" type="text" inputmode="email" autocomplete="email" placeholder="jane@acmesigns.com; bob@acmesigns.com" /></div>
           <div class="field"><label>Phone</label><input id="q-phone" placeholder="(555) 123-4567" /></div>
         </div>
 
@@ -772,7 +772,7 @@ footer span { color: var(--red); }
           </div>
           <div class="field-2">
             <div class="field"><label>Prepared By</label><input id="q-preparer" placeholder="Your name" /></div>
-            <div class="field"><label>Preparer Email</label><input id="q-preparer-email" type="email" placeholder="you@impactledsigns.com" /></div>
+            <div class="field"><label>Preparer Email <span style="color:var(--gray-500);font-weight:500">(multiple allowed, separated by ;)</span></label><input id="q-preparer-email" type="text" inputmode="email" autocomplete="email" placeholder="you@impactledsigns.com" /></div>
           </div>
         </div>
 
@@ -1627,13 +1627,24 @@ footer span { color: var(--red); }
     bumpQuoteSeq();
   });
 
+  // The email fields accept several addresses separated by semicolons (commas
+  // work too). Returns the trimmed, non-empty addresses.
+  function parseEmails(raw) {
+    return String(raw || '').split(/[;,]/).map(function (a) { return a.trim(); }).filter(Boolean);
+  }
+  function isValidEmail(a) {
+    return /^[^\s@;,<>]+@[^\s@;,<>]+\.[^\s@;,<>]+$/.test(a);
+  }
+
   document.getElementById('btn-send-client').addEventListener('click', function () {
     var msg = document.getElementById('modal-msg');
     var company       = document.getElementById('q-company').value.trim();
     var contact       = document.getElementById('q-contact').value.trim();
-    var email         = document.getElementById('q-email').value.trim();
+    var emails        = parseEmails(document.getElementById('q-email').value);
+    var email         = emails.join('; ');
     var preparer      = document.getElementById('q-preparer').value.trim();
-    var preparerEmail = document.getElementById('q-preparer-email').value.trim();
+    var preparerEmails = parseEmails(document.getElementById('q-preparer-email').value);
+    var preparerEmail = preparerEmails.join('; ');
     var ticket        = document.getElementById('q-ticket').value.trim();
     var ticketNa      = document.getElementById('q-ticket-na').checked;
     var project       = document.getElementById('q-project').value.trim();
@@ -1649,9 +1660,22 @@ footer span { color: var(--red); }
       document.getElementById('q-email').focus();
       return;
     }
+    var badClient = emails.filter(function (a) { return !isValidEmail(a); });
+    if (badClient.length) {
+      msg.textContent = "This client email doesn't look right: " + badClient.join(', ') +
+        ' (separate multiple addresses with a semicolon).';
+      document.getElementById('q-email').focus();
+      return;
+    }
     if (!preparer || !preparerEmail) {
       msg.textContent = 'Enter your name and email under Prepared By first.';
       document.getElementById(preparer ? 'q-preparer-email' : 'q-preparer').focus();
+      return;
+    }
+    var badPrep = preparerEmails.filter(function (a) { return !isValidEmail(a); });
+    if (badPrep.length) {
+      msg.textContent = "This Prepared By email doesn't look right: " + badPrep.join(', ') + '.';
+      document.getElementById('q-preparer-email').focus();
       return;
     }
     if (!ticket && !ticketNa) {
@@ -1746,7 +1770,8 @@ footer span { color: var(--red); }
       .then(function (res) { return res.json(); })
       .then(function (data) {
         if (data && data.ok) {
-          msg.textContent = 'Sent — ' + email + ' will get a link to review and approve.';
+          msg.textContent = 'Sent — ' + emails.join(', ') +
+            (emails.length > 1 ? ' will each get' : ' will get') + ' a link to review and approve.';
           bumpQuoteSeq();
         } else {
           msg.textContent = (data && data.error) || 'Something went wrong sending the quote.';
@@ -1772,7 +1797,7 @@ footer span { color: var(--red); }
     var m = quoteMath();
     var company  = document.getElementById('q-company').value.trim();
     var contact  = document.getElementById('q-contact').value.trim();
-    var email    = document.getElementById('q-email').value.trim();
+    var email    = parseEmails(document.getElementById('q-email').value).join('; ');
     var phone    = document.getElementById('q-phone').value.trim();
     var number   = document.getElementById('q-number').value.trim();
     var ticket   = document.getElementById('q-ticket').value.trim();

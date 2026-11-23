@@ -35,7 +35,17 @@ function doPost(e) {
   } catch (err) {
     return jsonOut_({ ok: false, error: 'Malformed request.' });
   }
-  if (body.action === 'create') return handleCreate_(body);
+  if (body.action === 'create') {
+    // Without this, any exception (bad address, daily mail quota, oversized
+    // cell) comes back as an HTML error page, which the browser can't parse
+    // and reports as a generic "could not reach the service" message.
+    try {
+      return handleCreate_(body);
+    } catch (err) {
+      Logger.log('handleCreate_ failed: ' + err);
+      return jsonOut_({ ok: false, error: 'The quote could not be sent: ' + (err && err.message || err) });
+    }
+  }
   if (body.action === 'sign') return handleSign_(body);
   if (body.action === 'status') return handleStatus_(body);
   return jsonOut_({ ok: false, error: 'Unknown action.' });
@@ -80,9 +90,18 @@ function doGet(e) {
 // ---------------------------------------------------------------- actions
 
 function handleCreate_(body) {
-  if (!body.email || !body.preparerEmail || !body.html) {
+  // Both email fields may hold several addresses separated by ";" (or ",").
+  var clientEmails = parseEmails_(body.email);
+  var preparerEmails = parseEmails_(body.preparerEmail);
+  if (!clientEmails.length || !preparerEmails.length || !body.html) {
     return jsonOut_({ ok: false, error: 'Missing required quote fields.' });
   }
+  var badEmails = clientEmails.concat(preparerEmails).filter(function (a) { return !EMAIL_RE_.test(a); });
+  if (badEmails.length) {
+    return jsonOut_({ ok: false, error: 'Invalid email address: ' + badEmails.join(', ') });
+  }
+  body.email = clientEmails.join('; ');
+  body.preparerEmail = preparerEmails.join('; ');
 
   var token = Utilities.getUuid();
   var dataJson = JSON.stringify({
@@ -115,11 +134,19 @@ function handleCreate_(body) {
     '<p style="color:#888;font-size:12px;">If the link above doesn\'t work, copy this URL into ' +
     'your browser:<br>' + signUrl + '</p>';
 
-  MailApp.sendEmail({
-    to: body.email,
-    subject: 'Quote ' + body.number + ' from ' + COMPANY_NAME + ' — please review & approve',
-    htmlBody: htmlBody
-  });
+  try {
+    MailApp.sendEmail({
+      to: clientEmails.join(','),
+      subject: 'Quote ' + body.number + ' from ' + COMPANY_NAME + ' — please review & approve',
+      htmlBody: htmlBody
+    });
+  } catch (mailErr) {
+    // The row is already saved; flag it so it's clear no email ever went out.
+    Logger.log('sendEmail failed for token ' + token + ': ' + mailErr);
+    var failedIdx = findRowIndex_(token);
+    if (failedIdx) getSheet_().getRange(failedIdx, HEADERS.indexOf('status') + 1).setValue('send failed');
+    return jsonOut_({ ok: false, error: 'The email could not be sent: ' + (mailErr && mailErr.message || mailErr) });
+  }
 
   return jsonOut_({ ok: true, token: token });
 }
@@ -208,7 +235,7 @@ function notifyApproval_(record, pdfBlob, signedAt, signerName) {
     '<p>The signed PDF is attached.</p>';
 
   MailApp.sendEmail({
-    to: record.preparerEmail,
+    to: parseEmails_(record.preparerEmail).join(','),
     cc: ACCOUNTING_EMAIL,
     subject: 'Signed: Quote ' + record.number + ' approved by ' + (record.company || record.contact),
     htmlBody: bodyHtml,
@@ -492,6 +519,15 @@ function rowToRecord_(row) {
 }
 
 // ---------------------------------------------------------------- misc helpers
+
+var EMAIL_RE_ = /^[^\s@;,<>]+@[^\s@;,<>]+\.[^\s@;,<>]+$/;
+
+// "a@x.com; b@y.com" -> ['a@x.com', 'b@y.com'] (commas also accepted).
+function parseEmails_(raw) {
+  return String(raw == null ? '' : raw).split(/[;,]/)
+    .map(function (a) { return a.trim(); })
+    .filter(Boolean);
+}
 
 function jsonOut_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
